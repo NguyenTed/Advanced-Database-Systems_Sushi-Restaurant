@@ -50,6 +50,22 @@ routes.get("/", (req, res) => {
   });
 });
 
+routes.get("/dieu-khoan-su-dung", (req, res) => {
+  res.render("layout/main-layout", {
+    title: "Điều khoản sử dụng | Samurai Sushi",
+    description: "Điều khoản sử dụng Samurai Sushi",
+    content: "../pages/term-of-use.ejs",
+  });
+});
+
+routes.get("/chinh-sach-bao-mat", (req, res) => {
+  res.render("layout/main-layout", {
+    title: "Chính sách bảo mật | Samurai Sushi",
+    description: "Chính sách bảo mật Samurai Sushi",
+    content: "../pages/privacy-policy.ejs",
+  });
+});
+
 routes.get("/gioi-thieu", (req, res) => {
   res.render("layout/main-layout", {
     title: "Samurai Sushi - Nhà hàng Nhật Bản",
@@ -76,11 +92,26 @@ routes.get("/chi-nhanh", (req, res) => {
   });
 });
 
+// Membership card routes
 routes.get("/the-thanh-vien", (req, res) => {
+  res.redirect("/the-thanh-vien/tra-cuu-diem");
+});
+
+routes.get("/the-thanh-vien/chinh-sach", (req, res) => {
   res.render("layout/main-layout", {
-    title: "Thẻ thành viên | Samurai Sushi",
-    description: "Về thẻ thành viên Samurai Sushi",
-    content: "../pages/membership-card.ejs",
+    title: "Chính sách thành viên | Samurai Sushi",
+    description: "Chính sách thành viên Samurai Sushi",
+    content: "../pages/membership-card/membership-card.ejs",
+    contentPath: "../membership-card/member-policy.ejs",
+  });
+});
+
+routes.get("/the-thanh-vien/tra-cuu-diem", (req, res) => {
+  res.render("layout/main-layout", {
+    title: "Tra cứu điểm | Samurai Sushi",
+    description: "Tra cứu điểm thành viên Samurai Sushi",
+    content: "../pages/membership-card/membership-card.ejs",
+    contentPath: "../membership-card/point-look-up.ejs",
   });
 });
 
@@ -109,8 +140,8 @@ routes.get("/tai-khoan/dang-ky", (req, res) => {
   res.render("layout/main-layout", {
     title: "Đăng ký | Samurai Sushi",
     description: "Đăng ký thành viên",
-    content: "../pages/account.ejs",
-    contentPath: "../pages/register.ejs",
+    content: "../pages/account/account.ejs",
+    contentPath: "../account/register.ejs",
   });
 });
 
@@ -118,8 +149,8 @@ routes.get("/tai-khoan/dang-nhap", (req, res) => {
   res.render("layout/main-layout", {
     title: "Đăng nhập | Samurai Sushi",
     description: "Đăng nhập người dùng / quản trị viên",
-    content: "../pages/account.ejs",
-    contentPath: "../pages/login.ejs",
+    content: "../pages/account/account.ejs",
+    contentPath: "../account/login.ejs",
   });
 });
 

@@ -1,0 +1,49 @@
+<div class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Tra cứu điểm thành viên</h1>
+            <form class="space-y-6">
+                <!-- Customer Name -->
+                <div>
+                    <label for="customerName" class="block text-gray-700 font-medium mb-2">
+                        <div class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span>Tên khách hàng</span>
+                        </div>
+                    </label>
+                    <input type="text" id="customerName" name="customerName" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+
+                <!-- Card Number -->
+                <div>
+                    <label for="cardNumber" class="block text-gray-700 font-medium mb-2">
+                        <div class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v1H4V6zm0 3h12v5H4V9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span>Mã số thẻ</span>
+                        </div>
+                    </label>
+                    <input type="text" id="cardNumber" name="cardNumber" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex flex-col items-center space-y-4">
+                    <button type="submit"
+                        class="w-full md:w-1/2 bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-700 hover:scale-105 transition-all shadow-lg">
+                        Tra cứu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
