@@ -41,9 +41,12 @@
                     <li><a href="/chi-nhanh"
                             class="text-lg rounded-full <%= path === '/chi-nhanh' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Chi
                             nhánh</a></li>
-                    <li><a href="/the-thanh-vien"
-                            class="text-lg rounded-full <%= path === '/the-thanh-vien' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Thẻ
-                            thành viên</a></li>
+                    <li class="relative group">
+                        <a href="/the-thanh-vien"
+                            class="text-lg rounded-full <%= path.startsWith('/the-thanh-vien') ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">
+                            Thẻ thành viên
+                        </a>
+                    </li>
                     <li><a href="/dat-ban"
                             class="text-lg rounded-full <%= path === '/dat-ban' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Đặt
                             bàn</a></li>
