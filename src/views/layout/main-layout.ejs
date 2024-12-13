@@ -32,30 +32,26 @@
             <!-- Right: Navigation -->
             <nav>
                 <ul class="flex space-x-6 items-center">
-                    <li><a href="/gioi-thieu"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Giới
+                    <li><a href="/"
+                            class="text-lg rounded-full <%= path === '/' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Giới
                             thiệu</a></li>
                     <li><a href="/thuc-don"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Thực
-                            đơn</a>
-                    </li>
+                            class="text-lg rounded-full <%= path === '/thuc-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Thực
+                            đơn</a></li>
                     <li><a href="/chi-nhanh"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Chi
-                            nhánh</a>
-                    </li>
+                            class="text-lg rounded-full <%= path === '/chi-nhanh' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Chi
+                            nhánh</a></li>
                     <li><a href="/the-thanh-vien"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Thẻ
-                            thành
-                            viên</a></li>
+                            class="text-lg rounded-full <%= path === '/the-thanh-vien' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Thẻ
+                            thành viên</a></li>
                     <li><a href="/dat-ban"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Đặt
-                            bàn</a>
-                    </li>
+                            class="text-lg rounded-full <%= path === '/dat-ban' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Đặt
+                            bàn</a></li>
                     <li><a href="/khuyen-mai"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Khuyến
+                            class="text-lg rounded-full <%= path === '/khuyen-mai' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Khuyến
                             mãi</a></li>
                     <li><a href="/dang-nhap"
-                            class="text-lg rounded-full bg-red-600 text-white py-2 px-4 hover:text-black hover:scale-105 transition-all inline-block">Đăng
+                            class="text-lg rounded-full <%= path === '/dang-nhap' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Đăng
                             nhập</a></li>
                 </ul>
             </nav>
@@ -127,7 +123,7 @@
 
         <!-- Scroll-to-top Button -->
         <button id="scrollToTopBtn"
-            class="hidden fixed bottom-6 right-6 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+            class="hidden fixed bottom-6 right-6 z-50 bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
