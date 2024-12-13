@@ -100,11 +100,26 @@ routes.get("/khuyen-mai", (req, res) => {
   });
 });
 
-routes.get("/dang-nhap", (req, res) => {
+// Account routes
+routes.get("/tai-khoan", (req, res) => {
+  res.redirect("/tai-khoan/dang-nhap");
+});
+
+routes.get("/tai-khoan/dang-ky", (req, res) => {
+  res.render("layout/main-layout", {
+    title: "Đăng ký | Samurai Sushi",
+    description: "Đăng ký thành viên",
+    content: "../pages/account.ejs",
+    contentPath: "../pages/register.ejs",
+  });
+});
+
+routes.get("/tai-khoan/dang-nhap", (req, res) => {
   res.render("layout/main-layout", {
     title: "Đăng nhập | Samurai Sushi",
-    description: "Đăng nhập quản trị viên",
-    content: "../pages/login.ejs",
+    description: "Đăng nhập người dùng / quản trị viên",
+    content: "../pages/account.ejs",
+    contentPath: "../pages/login.ejs",
   });
 });
 

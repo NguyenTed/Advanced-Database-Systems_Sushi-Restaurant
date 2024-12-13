@@ -50,9 +50,12 @@
                     <li><a href="/khuyen-mai"
                             class="text-lg rounded-full <%= path === '/khuyen-mai' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Khuyến
                             mãi</a></li>
-                    <li><a href="/dang-nhap"
-                            class="text-lg rounded-full <%= path === '/dang-nhap' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">Đăng
-                            nhập</a></li>
+                    <li class="relative group">
+                        <a href="/tai-khoan"
+                            class="text-lg rounded-full <%= path.startsWith('/tai-khoan') ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-4 hover:text-white hover:bg-red-600 hover:scale-105 transition-all inline-block">
+                            Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
