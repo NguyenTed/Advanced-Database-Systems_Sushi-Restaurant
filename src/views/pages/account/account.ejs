@@ -1,0 +1,18 @@
+<div class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Account Navigation -->
+        <div class="max-w-3xl mx-auto mb-6 flex justify-center space-x-4">
+            <a href="/tai-khoan/dang-nhap"
+                class="text-lg rounded-full <%= path === '/tai-khoan/dang-nhap' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                Đăng nhập
+            </a>
+            <a href="/tai-khoan/dang-ky"
+                class="text-lg rounded-full <%= path === '/tai-khoan/dang-ky' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                Đăng ký
+            </a>
+        </div>
+
+        <!-- Content Section -->
+        <%- include(contentPath) %>
+    </div>
+</div>

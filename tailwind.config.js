@@ -1,9 +1,7 @@
 export default {
-  content: [
-    "./src/*.{html,js,css}",
-    "./src/views/**/*.ejs",
-    "./public/js/**/*.js",
-  ],
+  content: ["./src/views/**/*.ejs"],
+  // mode: "jit",
+  // purge: ["./src/views/**/*.ejs"],
   theme: {
     extend: {},
   },

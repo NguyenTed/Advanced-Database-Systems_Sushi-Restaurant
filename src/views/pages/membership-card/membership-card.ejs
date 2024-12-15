@@ -1,0 +1,18 @@
+<div class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Navigation Tabs -->
+        <div class="max-w-3xl mx-auto mb-6 flex justify-center space-x-4">
+            <a href="/the-thanh-vien/chinh-sach"
+                class="text-lg rounded-full <%= path === '/the-thanh-vien/chinh-sach' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                Chính sách thành viên
+            </a>
+            <a href="/the-thanh-vien/tra-cuu-diem"
+                class="text-lg rounded-full <%= path === '/the-thanh-vien/tra-cuu-diem' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                Tra cứu điểm
+            </a>
+        </div>
+
+        <!-- Content Section -->
+        <%- include(contentPath) %>
+    </div>
+</div>
