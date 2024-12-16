@@ -1,0 +1,58 @@
+<div class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Branches Information Card -->
+        <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Hệ Thống Chi Nhánh</h1>
+
+            <div class="flex flex-col md:flex-row md:justify-between mb-6">
+                <!-- Dropdown Filters -->
+                <div class="flex gap-4">
+                    <div>
+                        <label for="city" class="block text-gray-700 font-medium mb-2">Thành phố</label>
+                        <select id="city" name="city" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="ho-chi-minh">TP Hồ Chí Minh</option>
+                            <option value="ha-noi">Hà Nội</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="district" class="block text-gray-700 font-medium mb-2">Quận</label>
+                        <select id="district" name="district" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="quan-1">Quận 1</option>
+                            <option value="quan-2">Quận 2</option>
+                            <option value="quan-7">Quận 7</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="mt-6 md:mt-0 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 shadow-md">TÌM KIẾM</button>
+            </div>
+
+            <!-- Branch Results -->
+            <div>
+                <p class="text-gray-600 mb-4">Có <strong>3 cửa hàng Samurai Sushi</strong> phù hợp với tìm kiếm của bạn</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Branch Item -->
+                <div class="bg-gray-100 rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">1.Samurai Sushi - PMH</h2>
+                    <p class="text-gray-600 mb-1">📍 107 Nguyễn Đức Cảnh, Q.7, TPHCM</p>
+                    <p class="text-gray-600">🕒 11:00 - 22:00</p>
+                </div>
+
+                <!-- Branch Item -->
+                <div class="bg-gray-100 rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">2. Samurai Sushi Crescent - PMH</h2>
+                    <p class="text-gray-600 mb-1">📍 Crescent Residence 1, Q.7, TPHCM</p>
+                    <p class="text-gray-600">🕒 11:00 - 22:00</p>
+                </div>
+
+                <!-- Branch Item -->
+                <div class="bg-gray-100 rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">3. Samurai Sushi - Tân Lửa</h2>
+                    <p class="text-gray-600 mb-1">📍 306 Đ. Tên Lửa, Bình Tân, TPHCM</p>
+                    <p class="text-gray-600">🕒 11:00 - 22:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
