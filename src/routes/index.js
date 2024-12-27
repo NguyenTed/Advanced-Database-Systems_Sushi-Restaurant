@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { PATH } from "../config/path.js";
+import menuRoute from "./menu-route.js";
 
 const routes = Router();
+routes.use(menuRoute);
 
 // Dummy Data
 const dummyBranches = [
@@ -71,15 +72,6 @@ routes.get("/gioi-thieu", (req, res) => {
     title: "Samurai Sushi - Nhà hàng Nhật Bản",
     description: "Nhà hàng Nhật Bản cao cấp tại Sài Gòn",
     content: "../pages/home.ejs",
-  });
-});
-
-routes.get("/thuc-don", (req, res) => {
-  res.render("layout/main-layout", {
-    title: "Thực đơn | Samurai Sushi",
-    description: "Thực đơn món ăn tại Samurai Sushi",
-    content: "../pages/menu.ejs",
-    menuItems: dummyMenuItems,
   });
 });
 
