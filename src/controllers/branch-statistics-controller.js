@@ -130,3 +130,65 @@ export const renderBranchRevenue = async (req, res) => {
     revenueData
   });
 };
+
+export const renderBranchEmployees = async (req, res) => {
+  const { branchId, employmentStatus = 'current', search, page = 1 } = req.query;
+  const perPage = 20; // Number of rows per page
+  let employees = [];
+  let totalEmployees = 0;
+
+  if (branchId) {
+    // Base query
+    let baseQuery = db('employee')
+      .join('department', 'employee.department_id', 'department.department_id')
+      .join('employee_work_history', 'employee.employee_id', 'employee_work_history.employee_id')
+      .where('employee_work_history.branch_id', branchId);
+
+    // Employment status filter
+    if (employmentStatus === 'current') {
+      baseQuery = baseQuery.whereNull('employee_work_history.end_date');
+    } else if (employmentStatus === 'former') {
+      baseQuery = baseQuery.whereNotNull('employee_work_history.end_date');
+    }
+
+    // Search filter
+    if (search) {
+      baseQuery = baseQuery.where(function () {
+        this.where('employee.name', 'like', `%${search}%`)
+          .orWhere('employee.phone_number', 'like', `%${search}%`)
+          .orWhere('employee.address', 'like', `%${search}%`)
+          .orWhere('department.name', 'like', `%${search}%`);
+      });
+    }
+
+    // Count total employees (separate query)
+    const countResult = await baseQuery.clone().count('employee.employee_id as total').first();
+    totalEmployees = countResult.total;
+
+    // Get paginated employees
+    employees = await baseQuery
+      .select('employee.employee_id', 'employee.name', 'employee.phone_number', 'employee.address', 'employee.salary', 'department.name as department_name', 'employee_work_history.end_date')
+      .orderBy('employee.employee_id')
+      .limit(perPage)
+      .offset((Number(page) - 1) * perPage);
+  }
+
+  const branches = await db('branch');
+  res.render('layout/main-layout', {
+    title: 'Nhân viên chi nhánh | Samurai Sushi',
+    description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
+    content: '../pages/statistics/branch/branch.ejs',
+    contentPath: '../branch/employees.ejs',
+    branches,
+    selectedBranch: branchId,
+    employmentStatus,
+    searchTerm: search,
+    employees,
+    pagination: {
+      currentPage: Number(page),
+      perPage,
+      totalItems: totalEmployees,
+      totalPages: Math.ceil(totalEmployees / perPage)
+    }
+  });
+};

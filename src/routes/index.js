@@ -6,7 +6,7 @@ import membershipRoute from './membership-route.js';
 import reservationRoute from './reservation-route.js';
 import promotionsRoute from './promotions-route.js';
 import accountRoute from './account-route.js';
-import statisticsRoute from './statistics-route.js';
+import statisticsRoute from './branch-statistics-route.js';
 
 const routes = Router();
 routes.use((req, res, next) => {
