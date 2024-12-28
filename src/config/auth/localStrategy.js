@@ -24,9 +24,9 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   console.log('Deserializing user with ID:', id);
   try {
-    const user = await db('account').where('account_id', id).first();
-    console.log('Deserialized user:', user);
-    done(null, user);
+    const account = await db('account').where('account_id', id).first();
+    console.log('Deserialized account:', account);
+    done(null, account);
   } catch (err) {
     console.error('Deserialization Error:', err);
     done(err);
