@@ -1,6 +1,6 @@
-import { Router } from "express";
-import { PATH } from "../config/path.js";
-import { renderMenuPage } from "../controllers/menu-controller.js";
+import { Router } from 'express';
+import { PATH } from '../config/path.js';
+import { renderMenuPage } from '../controllers/menu-controller.js';
 
 const routes = Router();
 routes.use((req, res, next) => {

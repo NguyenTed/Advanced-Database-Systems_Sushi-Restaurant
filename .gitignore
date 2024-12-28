@@ -4,3 +4,4 @@
 .env
 .vscode
 public/css/output.css
+package-lock.json
