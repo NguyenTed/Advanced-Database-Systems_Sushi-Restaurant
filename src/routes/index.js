@@ -1,5 +1,6 @@
 import { Router } from "express";
 import menuRoute from "./menu-route.js";
+import { db } from '../config/db.js'; 
 
 const routes = Router();
 routes.use(menuRoute);
@@ -107,11 +108,26 @@ routes.get("/the-thanh-vien/tra-cuu-diem", (req, res) => {
   });
 });
 
-routes.get("/dat-ban", (req, res) => {
-  res.render("layout/main-layout", {
-    title: "Đặt bàn | Samurai Sushi",
-    description: "Đặt bàn tại Samurai Sushi",
-    content: "../pages/reservation.ejs",
+routes.get("/dat-ban", async (req, res) => {
+  try {
+    const branches = await db.select("branch_id", "name").from("branch"); 
+    res.render("layout/main-layout", {
+      title: "Đặt bàn | Samurai Sushi",
+      description: "Đặt bàn tại Samurai Sushi",
+      content: "../pages/reservation.ejs",
+      branches,
+    });
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    res.status(500).send('Error loading branch');
+  }
+});
+
+routes.get('/reservation', (req, res) => {
+  res.render('layout/main-layout', {
+    title: 'Đặt bàn thành công',
+    description: 'Cảm ơn bạn đã đặt bàn tại Samurai Sushi!',
+    content: '../pages/success.ejs',
   });
 });
 
