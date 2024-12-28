@@ -396,3 +396,75 @@ export const renderBranchCustomers = async (req, res) => {
     }
   });
 };
+
+export const renderBranchInvoices = async (req, res) => {
+  const { branchId, search, page = 1, startDate, endDate } = req.query;
+  const perPage = 20;
+  let invoices = [];
+  let totalInvoices = 0;
+
+  if (branchId) {
+    // Base query
+    const baseQuery = db('invoice as i')
+      .join('order as o', 'i.order_id', 'o.order_id')
+      .leftJoin('customer as c', 'i.customer_id', 'c.customer_id')
+      .where('o.branch_id', branchId);
+
+    // Apply search filters if any
+    if (search || startDate || endDate) {
+      baseQuery.where(function() {
+        if (search) {
+          this.where('c.name', 'like', `%${search}%`)
+            .orWhere('i.invoice_id', 'like', `%${search}%`);
+        }
+        if (startDate) {
+          this.where('i.issue_date', '>=', startDate);
+        }
+        if (endDate) {
+          this.where('i.issue_date', '<=', endDate);
+        }
+      });
+    }
+
+    // Count total invoices
+    const countResult = await baseQuery.clone().count('i.invoice_id as total').first();
+    totalInvoices = countResult.total;
+
+    // Get paginated invoices
+    invoices = await baseQuery
+      .select(
+        'i.invoice_id',
+        'i.issue_date',
+        'i.total_amount',
+        'i.discount_amount',
+        'i.points_earned',
+        'c.name as customer_name',
+        'c.customer_id',
+        'c.phone_number'
+      )
+      .orderBy('i.issue_date', 'desc')
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+  }
+
+  const branches = await db('branch');
+
+  res.render('layout/main-layout', {
+    title: 'Hóa đơn chi nhánh | Samurai Sushi',
+    description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
+    content: '../pages/statistics/branch/branch.ejs',
+    contentPath: '../branch/invoices.ejs',
+    branches,
+    selectedBranch: branchId,
+    searchTerm: search,
+    startDate,
+    endDate,
+    invoices,
+    pagination: {
+      currentPage: Number(page),
+      perPage,
+      totalItems: totalInvoices,
+      totalPages: Math.ceil(totalInvoices / perPage)
+    }
+  });
+};
