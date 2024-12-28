@@ -86,7 +86,7 @@
                     </svg>
                 </button>
             
-                <ul id="dropdownMenu" class='absolute block shadow-lg bg-white py-2 z-[1000] min-w-full w-max rounded-lg max-h-96 overflow-auto'>
+                <ul id="dropdownMenu" class='hidden absolute shadow-lg bg-white py-2 z-[1000] min-w-full w-max rounded-lg max-h-96 overflow-auto'>
                     <li class='py-2.5 px-5 flex items-center hover:bg-gray-100 text-[#333] text-sm cursor-pointer'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-4 h-4 mr-3" viewBox="0 0 512 512">
                         <path
@@ -209,17 +209,17 @@
   });
 
   let dropdownToggle = document.getElementById('dropdownToggle');
-let dropdownMenu = document.getElementById('dropdownMenu');
+    let dropdownMenu = document.getElementById('dropdownMenu');
 
-function handleClick() {
-    if (dropdownMenu.className.includes('block')) {
-        dropdownMenu.classList.add('hidden')
-        dropdownMenu.classList.remove('block')
-    } else {
-        dropdownMenu.classList.add('block')
-        dropdownMenu.classList.remove('hidden')
+    function handleClick() {
+        if (dropdownMenu.className.includes('block')) {
+            dropdownMenu.classList.add('hidden')
+            dropdownMenu.classList.remove('block')
+        } else {
+            dropdownMenu.classList.add('block')
+            dropdownMenu.classList.remove('hidden')
+        }
     }
-}
 
-dropdownToggle.addEventListener('click', handleClick);
+    dropdownToggle.addEventListener('click', handleClick);
 </script>
