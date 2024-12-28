@@ -1,89 +1,125 @@
 <div class="bg-gray-50 py-8">
-    <div class="container mx-auto px-4">
-        <!-- Registration Form Card -->
-        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Đăng ký tài khoản</h1>
+  <div class="container mx-auto px-4">
+    <!-- Registration Form Card -->
+    <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
+      <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Đăng ký tài khoản</h1>
 
-            <form class="space-y-6">
-                <!-- Full Name -->
-                <div>
-                    <label for="fullName" class="block text-gray-700 font-medium mb-2">Họ và tên</label>
-                    <input type="text" id="fullName" name="fullName" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
+      <form class="space-y-6" method="post" action="/tai-khoan/dang-ky">
+        <!-- Full Name -->
+        <div>
+          <label for="fullName" class="block text-gray-700 font-medium mb-2">Họ và tên</label>
+          <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
+        </div>
 
-                <!-- Citizen ID -->
-                <div>
-                    <label for="cccd" class="block text-gray-700 font-medium mb-2">CCCD</label>
-                    <input type="text" id="cccd" name="cccd" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
+        <!-- Citizen ID -->
+        <div>
+          <label for="personalId" class="block text-gray-700 font-medium mb-2">CCCD</label>
+          <input
+            type="text"
+            id="personalId"
+            name="personalId"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
 
-                <!-- Birth Date and Gender Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="birthDate" class="block text-gray-700 font-medium mb-2">Ngày sinh</label>
-                        <input type="date" id="birthDate" name="birthDate" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-4">Giới tính</label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center space-x-2">
-                                <input type="radio" name="gender" value="male"
-                                    class="peer appearance-none w-5 h-5 border-2 border-gray-400 rounded-full checked:border-red-600 checked:bg-red-600 checked:shadow-[inset_0_0_0_4px_white] transition-all">
-                                <span class="ml-2">Nam</span>
-                            </label>
-                            <label class="inline-flex items-center space-x-2">
-                                <input type="radio" name="gender" value="female"
-                                    class="peer appearance-none w-5 h-5 border-2 border-gray-400 rounded-full checked:border-red-600 checked:bg-red-600 checked:shadow-[inset_0_0_0_4px_white] transition-all">
-                                <span class="ml-2">Nữ</span>
-                            </label>
-                            <label class="inline-flex items-center space-x-2">
-                                <input type="radio" name="gender" value="other"
-                                    class="peer appearance-none w-5 h-5 border-2 border-gray-400 rounded-full checked:border-red-600 checked:bg-red-600 checked:shadow-[inset_0_0_0_4px_white] transition-all">
-                                <span class="ml-2">Khác</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+        <!-- Birth Date and Gender Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="birthDate" class="block text-gray-700 font-medium mb-2">Ngày sinh</label>
+            <input
+              type="date"
+              id="birthDate"
+              name="birthDate"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label class="block text-gray-700 font-medium mb-4">Giới tính</label>
+            <div class="flex space-x-4">
+              <label class="inline-flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  class="peer appearance-none w-5 h-5 border-2 border-gray-400 rounded-full checked:border-red-600 checked:bg-red-600 checked:shadow-[inset_0_0_0_4px_white] transition-all"
+                />
+                <span class="ml-2">Nam</span>
+              </label>
+              <label class="inline-flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  class="peer appearance-none w-5 h-5 border-2 border-gray-400 rounded-full checked:border-red-600 checked:bg-red-600 checked:shadow-[inset_0_0_0_4px_white] transition-all"
+                />
+                <span class="ml-2">Nữ</span>
+              </label>
+            </div>
+          </div>
+        </div>
 
-                <!-- Contact Information -->
-                <div>
-                    <label for="phone" class="block text-gray-700 font-medium mb-2">Số điện thoại</label>
-                    <input type="tel" id="phone" name="phone" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
-                    <input type="email" id="email" name="email" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
+        <!-- Contact Information -->
+        <div>
+          <label for="phoneNumber" class="block text-gray-700 font-medium mb-2">Số điện thoại</label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            name="phoneNumber"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
 
-                <!-- Password Fields -->
-                <div>
-                    <label for="password" class="block text-gray-700 font-medium mb-2">Mật khẩu</label>
-                    <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
-                <div>
+        <!-- Username Fields -->
+        <div>
+          <label for="username" class="block text-gray-700 font-medium mb-2">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
+
+        <!-- Password Fields -->
+        <div>
+          <label for="password" class="block text-gray-700 font-medium mb-2">Mật khẩu</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+          />
+        </div>
+        <!-- <div>
                     <label for="confirmPassword" class="block text-gray-700 font-medium mb-2">Xác nhận mật khẩu</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" required
                         class="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                </div>
+                </div> -->
 
-                <!-- Submit Button -->
-                <div class="flex flex-col items-center space-y-4">
-                    <button type="submit"
-                        class="w-full md:w-1/2 bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-700 hover:scale-105 transition-all shadow-lg">
-                        Đăng ký
-                    </button>
-                    <p class="text-gray-600">
-                        Đã có tài khoản?
-                        <a href="/tai-khoan/dang-nhap" class="text-red-600 hover:text-red-700 font-medium">Đăng nhập</a>
-                    </p>
-                </div>
-            </form>
+        <!-- Submit Button -->
+        <div class="flex flex-col items-center space-y-4">
+          <button type="submit" class="w-full md:w-1/2 bg-red-600 text-white py-3 px-8 rounded-full hover:bg-red-700 hover:scale-105 transition-all shadow-lg">Đăng ký</button>
+          <p class="text-gray-600">
+            Đã có tài khoản?
+            <a href="/tai-khoan/dang-nhap" class="text-red-600 hover:text-red-700 font-medium">Đăng nhập</a>
+          </p>
         </div>
+      </form>
     </div>
+  </div>
 </div>
