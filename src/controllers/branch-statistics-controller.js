@@ -275,7 +275,7 @@ export const renderBranchEmployees = async (req, res) => {
     title: 'Nhân viên chi nhánh | Samurai Sushi',
     description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
-    contentPath:  employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
+    contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
     branches,
     selectedBranch: branchId,
     employmentStatus,
@@ -293,6 +293,106 @@ export const renderBranchEmployees = async (req, res) => {
       perPage,
       totalItems: totalEmployees,
       totalPages: Math.ceil(totalEmployees / perPage)
+    }
+  });
+};
+
+export const renderBranchCustomers = async (req, res) => {
+  const { branchId, search, page = 1, customerId } = req.query;
+  const perPage = 20;
+  let customers = [];
+  let totalCustomers = 0;
+  let selectedCustomer = null;
+
+  if (branchId) {
+    if (customerId) {
+      // Get selected customer with membership card info
+      selectedCustomer = await db('customer')
+        .select(
+          'customer.*',
+          'membership_card.card_num',
+          'membership_card.type',
+          'membership_card.points',
+          'membership_card.issue_date',
+          'membership_card.discount_amount'
+        )
+        .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id')
+        .where('customer.customer_id', customerId)
+        .first();
+    } else {
+      // Base conditions for search
+      const applyConditions = (query) => {
+        query.where('order.branch_id', branchId);
+        if (search) {
+          query.where(function() {
+            const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+            const matches = search.match(dateRegex);
+
+            this.where('customer.name', 'like', `%${search}%`)
+              .orWhere('customer.phone_number', 'like', `%${search}%`)
+              .orWhere('customer.email', 'like', `%${search}%`)
+              .orWhere('customer.personal_id', 'like', `%${search}%`)
+              .orWhere('customer.gender', 'like', `${search}`);
+
+            if (matches) {
+              const [, day, month, year] = matches;
+              const mysqlDate = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+              this.orWhere('customer.date_of_birth', mysqlDate);
+            }
+          });
+        }
+        return query;
+      };
+
+      // Count query
+      const countQuery = db('customer')
+        .join('order', 'customer.customer_id', 'order.customer_id');
+      applyConditions(countQuery);
+      const countResult = await countQuery
+        .countDistinct('customer.customer_id as total')
+        .first();
+      totalCustomers = countResult.total;
+
+      // Data query
+      const dataQuery = db('customer')
+        .select(
+          'customer.customer_id',
+          'customer.name',
+          'customer.phone_number',
+          'customer.email',
+          'customer.personal_id',
+          'customer.date_of_birth',
+          'customer.gender',
+          'membership_card.card_num'
+        )
+        .distinct()
+        .join('order', 'customer.customer_id', 'order.customer_id')
+        .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id');
+      
+      applyConditions(dataQuery);
+      customers = await dataQuery
+        .orderBy('customer.customer_id')
+        .limit(perPage)
+        .offset((Number(page) - 1) * perPage);
+    }
+  }
+
+  const branches = await db('branch');
+  res.render('layout/main-layout', {
+    title: 'Khách hàng chi nhánh | Samurai Sushi',
+    description: 'Thống kê khách hàng chi nhánh Samurai Sushi',
+    content: '../pages/statistics/branch/branch.ejs',
+    contentPath: '../branch/customers.ejs',
+    branches,
+    selectedBranch: branchId,
+    searchTerm: search,
+    customers,
+    selectedCustomer,
+    pagination: {
+      currentPage: Number(page),
+      perPage,
+      totalItems: totalCustomers,
+      totalPages: Math.ceil(totalCustomers / perPage)
     }
   });
 };
