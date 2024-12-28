@@ -7,6 +7,7 @@ import reservationRoute from './reservation-route.js';
 import promotionsRoute from './promotions-route.js';
 import accountRoute from './account-route.js';
 import statisticsRoute from './branch-statistics-route.js';
+import policiesRoute from './policies-route.js';
 
 const routes = Router();
 routes.use((req, res, next) => {
@@ -22,6 +23,7 @@ routes.use(membershipRoute);
 routes.use(reservationRoute);
 routes.use(promotionsRoute);
 routes.use(accountRoute);
+routes.use(policiesRoute);
 
 routes.use((req, res) => {
   res.status(404).render('layout/main-layout.ejs', {
