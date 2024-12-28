@@ -253,7 +253,13 @@ export const renderBranchEmployees = async (req, res) => {
           this.where('employee.name', 'like', `%${search}%`)
             .orWhere('employee.phone_number', 'like', `%${search}%`)
             .orWhere('employee.address', 'like', `%${search}%`)
-            .orWhere('department.name', 'like', `%${search}%`);
+            .orWhere('department.name', 'like', `%${search}%`)
+            .orWhere(function() {
+              const salaryNum = parseFloat(search.replace(/[^0-9.-]+/g, ""));
+              if (!isNaN(salaryNum)) {
+                this.where('employee.salary', '=', salaryNum);
+              }
+            });
         });
       }
 
