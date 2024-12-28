@@ -3,14 +3,14 @@
     <section class="bg-gray-100 py-10">
     <div class="container mx-auto px-4">
         <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Đặt Bàn Ngay</h2>
-        <form action="/reservation" method="POST" class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <form action="/dat-ban" method="POST" class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
             <div class="mb-4">
-                <label for="branch" class="block text-sm font-medium text-gray-700">Chi nhánh</label>
-                <select id="branch" name="branch" required
+                <label for="branch_id" class="block text-sm font-medium text-gray-700">Chi nhánh</label>
+                <select id="branch_id" name="branch_id" required
                   class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
                   <option value="">Chọn chi nhánh</option>
                   <% branches.forEach(branch => { %>
-                    <option value="<%= branch.id %>"><%= branch.name %></option>
+                    <option value="<%= branch.branch_id %>"><%= branch.name %></option>
                   <% }) %>
                 </select>
             </div>

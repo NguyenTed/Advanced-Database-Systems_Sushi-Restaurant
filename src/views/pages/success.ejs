@@ -1,5 +1,14 @@
 <div class="container mx-auto text-center py-10">
-    <h1 class="text-3xl font-bold text-green-500">Đặt bàn thành công!</h1>
-    <p class="mt-4 text-gray-700">Cảm ơn bạn đã đặt bàn tại Samurai Sushi. Chúng tôi sẽ liên hệ để xác nhận!</p>
-    <a href="/" class="mt-6 inline-block px-6 py-3 bg-red-500 text-white rounded-md hover:bg-red-600">Quay lại trang chủ</a>
-  </div>
+  <h1 class="text-3xl font-bold text-green-500">Đặt bàn thành công!</h1>
+  <p class="mt-4 text-gray-700">Cảm ơn bạn đã đặt bàn tại chi nhánh <b><%= branch_name %></b>.</p>
+  <p class="mt-2">Thông tin đặt bàn:</p>
+  <ul class="mt-4 text-left mx-auto max-w-md">
+    <li><b>Họ và tên:</b> <%= name %></li>
+    <li><b>Số điện thoại:</b> <%= phone %></li>
+    <li><b>Ngày đặt:</b> <%= reservationDate.toLocaleDateString() %></li>
+    <li><b>Giờ đặt:</b> <%= reservationDate.toLocaleTimeString() %></li>
+    <li><b>Số lượng khách:</b> <%= guests %></li>
+    <li><b>Bàn:</b> <%= table_id %></li>
+  </ul>
+  <a href="/" class="mt-6 inline-block px-6 py-3 bg-red-500 text-white rounded-md hover:bg-red-600">Quay lại trang chủ</a>
+</div>
