@@ -1,0 +1,150 @@
+<div class="max-w-6xl mx-auto">
+    <% if (selectedBranch) { %>
+      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <!-- Search Section -->
+        <div class="flex justify-center space-y-4">
+          <form class="w-full space-y-4" onsubmit="handleSearch(event)">
+            <div class="flex justify-center space-x-4">
+              <input type="text" 
+                     id="searchInput" 
+                     placeholder="Tìm kiếm theo tên khách hàng hoặc mã hóa đơn..." 
+                     value="<%= searchTerm || '' %>"
+                     class="w-1/2 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+              <div class="flex items-center space-x-2">
+                <label class="text-gray-600">Từ ngày:</label>
+                <input type="date" 
+                       id="startDate" 
+                       value="<%= startDate || '' %>"
+                       class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              </div>
+              <div class="flex items-center space-x-2">
+                <label class="text-gray-600">Đến ngày:</label>
+                <input type="date" 
+                       id="endDate" 
+                       value="<%= endDate || '' %>"
+                       class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              </div>
+              <button type="submit" 
+                      class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 hover:scale-105 transition-all">
+                Tìm kiếm
+              </button>
+            </div>
+          </form>
+        </div>
+  
+        <!-- Invoice Table -->
+        <% if (invoices.length > 0) { %>
+          <div class="overflow-x-auto mt-6">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b-2 border-gray-200">
+                  <th class="text-left py-3 font-bold">STT</th>
+                  <th class="text-left py-3">Mã hóa đơn</th>
+                  <th class="text-left py-3">Ngày lập</th>
+                  <th class="text-left py-3">Tên khách hàng</th>
+                  <th class="text-left py-3">SĐT khách hàng</th>
+                  <th class="text-right py-3">Tổng tiền</th>
+                  <th class="text-right py-3">Giảm giá</th>
+                  <th class="text-right py-3">Điểm tích lũy</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% invoices.forEach((invoice, index) => { %>
+                  <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="py-3 font-bold"><%= (pagination.currentPage - 1) * pagination.perPage + index + 1 %></td>
+                    <td class="py-3"><%= invoice.invoice_id %></td>
+                    <td class="py-3"><%= new Date(invoice.issue_date).toLocaleDateString('vi-VN') %></td>
+                    <td class="py-3"><%= invoice.customer_name || 'N/A' %></td>
+                    <td class="py-3"><%= invoice.phone_number || 'N/A' %></td>
+                    <td class="py-3 text-right"><%= invoice.total_amount.toLocaleString('vi-VN') %> ₫</td>
+                    <td class="py-3 text-right"><%= invoice.discount_amount.toLocaleString('vi-VN') %> ₫</td>
+                    <td class="py-3 text-right"><%= invoice.points_earned || 0 %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+  
+          <!-- Pagination -->
+          <div class="mt-6 flex flex-col items-center space-y-4">
+            <div class="flex justify-center space-x-2 items-center">
+              <% if (pagination.totalPages > 1) { %>
+                <% if (pagination.currentPage > 1) { %>
+                  <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">←</a>
+                <% } %>
+  
+                <% 
+                  const pageBuffer = 2;
+                  const showEllipsisStart = pagination.currentPage > pageBuffer + 1;
+                  const showEllipsisEnd = pagination.currentPage < pagination.totalPages - pageBuffer;
+                  
+                  for(let i = 1; i <= pagination.totalPages; i++) { 
+                    if (i === 1 || i === pagination.totalPages || 
+                       (i >= pagination.currentPage - pageBuffer && i <= pagination.currentPage + pageBuffer)) { 
+                %>
+                  <a href="?branchId=<%= selectedBranch %>&page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                     class="px-4 py-2 rounded-lg <%= pagination.currentPage === i ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %>">
+                    <%= i %>
+                  </a>
+                <% } else if ((i === 2 && showEllipsisStart) || 
+                             (i === pagination.currentPage + pageBuffer + 1 && showEllipsisEnd)) { %>
+                  <span class="px-4 py-2">...</span>
+                <% } } %>
+  
+                <% if (pagination.currentPage < pagination.totalPages) { %>
+                  <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                     class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">→</a>
+                <% } %>
+              <% } %>
+            </div>
+  
+            <div class="text-center text-gray-600">
+              Hiển thị <%= (pagination.currentPage - 1) * pagination.perPage + 1 %> - 
+              <%= Math.min(pagination.currentPage * pagination.perPage, pagination.totalItems) %> 
+              trong tổng số <%= pagination.totalItems %> hóa đơn
+            </div>
+          </div>
+        <% } else { %>
+          <div class="text-center text-gray-600 mt-6">
+            Không tìm thấy hóa đơn nào
+          </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+        Vui lòng chọn chi nhánh để xem danh sách hóa đơn
+      </div>
+    <% } %>
+  </div>
+  
+  <script>
+    function handleSearch(event) {
+      event.preventDefault();
+      const searchTerm = document.getElementById('searchInput').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      
+      const url = new URL(window.location.href);
+      if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+      } else {
+        url.searchParams.delete('search');
+      }
+      if (startDate) {
+        url.searchParams.set('startDate', startDate);
+      } else {
+        url.searchParams.delete('startDate');
+      }
+      if (endDate) {
+        url.searchParams.set('endDate', endDate);
+      } else {
+        url.searchParams.delete('endDate');
+      }
+      url.searchParams.set('page', 1);
+      window.location.href = url;
+    }
+  </script>
