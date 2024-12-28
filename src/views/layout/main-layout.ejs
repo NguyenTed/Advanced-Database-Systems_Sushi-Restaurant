@@ -13,6 +13,8 @@
     <meta name="og:description" content="<%= description %>" />
 
     <link rel="stylesheet" href="/css/output.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </head>
 
 <body class="font-nunito">
@@ -141,11 +143,11 @@
 
 <script>
     // Get the button
-    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+    const scrollToTopBtn=document.getElementById("scrollToTopBtn");
 
     // Show or hide the button depending on the scroll position
     window.addEventListener("scroll", () => {
-        if (window.scrollY > 200) {
+        if (window.scrollY>200) {
             scrollToTopBtn.classList.remove("hidden");
         } else {
             scrollToTopBtn.classList.add("hidden");
