@@ -72,23 +72,27 @@ export const handleSignUp = async (req, res) => {
         contentPath: '../account/register.ejs'
       });
     } else {
-      const newAccount = {
+      const newUser = {
         username: username,
         password: await bcrypt.hash(password, 10),
-        role: 'Khách hàng'
-      };
-      const acc = await db('account').insert(newAccount);
-      console.log(acc);
-      const newUser = {
         name: name,
         phone_number: phoneNumber,
         personal_id: personalId,
         date_of_birth: date_of_birth,
         gender: gender,
-        email: email,
-        account_id: acc[0]
+        email: email
       };
-      await db('customer').insert(newUser);
+      const result = await db.raw(`CALL SignupNewCustomer(?, ?, ?, ?, ?, ?, ?, ?)`, [
+        newAccount.username,
+        newAccount.password,
+        newUser.name,
+        newUser.phone_number,
+        newUser.email,
+        newUser.personal_id,
+        newUser.date_of_birth,
+        newUser.gender
+      ]);
+      console.log(result);
       req.flash('success_msg', 'You are now registered and can log in');
       res.redirect('/tai-khoan/dang-nhap');
     }
