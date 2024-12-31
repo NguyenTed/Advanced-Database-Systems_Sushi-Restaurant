@@ -3,7 +3,7 @@
         <% if (selectedCustomer) { %>
             <!-- Back Button -->
             <div class="mb-6">
-                <a href="?branchId=<%= selectedBranch %>"
+                <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>"
                     class="inline-flex items-center text-red-600 hover:text-red-700">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -161,7 +161,7 @@
                                             </td>
                                             <td class="py-3">
                                                 <% if (customer.card_num) { %>
-                                                    <a href="?branchId=<%= selectedBranch %>&customerId=<%= customer.customer_id %>"
+                                                    <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&customerId=<%= customer.customer_id %>"
                                                         class="text-red-600 hover:text-red-700 font-medium">
                                                         Xem thẻ thành viên
                                                     </a>
@@ -198,7 +198,7 @@
                                 <% if (pagination.totalPages> 1) { %>
                                     <!-- Previous Page -->
                                     <% if (pagination.currentPage> 1) { %>
-                                        <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                                        <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                             class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                             ←
                                         </a>
@@ -213,7 +213,7 @@
                                                     || i===pagination.totalPages || (i>= pagination.currentPage -
                                                     pageBuffer && i
                                                     <= pagination.currentPage + pageBuffer)) { %>
-                                                        <a href="?branchId=<%= selectedBranch %>&page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                                                        <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                                             class="px-4 py-2 rounded-lg <%= pagination.currentPage === i ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
                                                             <%= i %>
                                                         </a>
@@ -245,7 +245,7 @@
                                                                 <!-- Next Page -->
                                                                 <% if (pagination.currentPage < pagination.totalPages) {
                                                                     %>
-                                                                    <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                                                                    <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                                                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                                                         →
                                                                     </a>

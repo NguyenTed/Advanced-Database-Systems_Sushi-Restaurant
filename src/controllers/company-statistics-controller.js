@@ -1,19 +1,28 @@
 import { db } from '../config/db.js';
 
+async function getAreasData() {
+  return await db('area').select('area.*').count('branch.branch_id as branchCount').leftJoin('branch', 'area.area_id', 'branch.area_id').groupBy('area.area_id');
+}
+
 export const renderBranchStatistics = async (req, res) => {
-  const { branchId } = req.query;
-  const branches = await db('branch');
+  const { areaId, branchId } = req.query;
+  const areas = await getAreasData();
+  const branches = await db('branch').select('branch.*', 'area.name as area_name').leftJoin('area', 'branch.area_id', 'area.area_id').orderBy(['area.name', 'branch.name']);
+
   res.render('layout/main-layout', {
     title: 'Thống kê chi nhánh | Samurai Sushi',
     description: 'Thống kê chi nhánh Samurai Sushi',
     content: '../pages/statistics/company/company.ejs',
+    areas,
     branches,
+    selectedArea: areaId,
     selectedBranch: branchId
   });
 };
 
 export const renderBranchRevenue = async (req, res) => {
-  const { branchId, period = 'day', year, month, yearLimit = 5 } = req.query; // Default to 'day'
+  const { branchId, period = 'day', year, month, yearLimit = 5, areaId } = req.query; // Default to 'day'
+  const areas = await getAreasData();
   let revenueData = [];
   let availableYears = [];
   let availableMonths = [];
@@ -119,7 +128,9 @@ export const renderBranchRevenue = async (req, res) => {
     description: 'Thống kê doanh thu chi nhánh Samurai Sushi',
     content: '../pages/statistics/company/company.ejs',
     contentPath: '../company/revenue.ejs',
+    areas,
     branches,
+    selectedArea: areaId,
     selectedBranch: branchId,
     selectedPeriod: period,
     selectedYear: year,
@@ -132,7 +143,8 @@ export const renderBranchRevenue = async (req, res) => {
 };
 
 export const renderBranchEmployees = async (req, res) => {
-  const { branchId, employeeId, period = 'day', year, month, yearLimit = 5, employmentStatus = 'all', search, page = 1 } = req.query;
+  const { branchId, employeeId, period = 'day', year, month, yearLimit = 5, employmentStatus = 'all', search, page = 1, areaId } = req.query;
+  const areas = await getAreasData();
 
   const perPage = 20;
   let employees = [];
@@ -282,7 +294,9 @@ export const renderBranchEmployees = async (req, res) => {
     description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
     content: '../pages/statistics/company/company.ejs',
     contentPath: employeeId ? '../company/employee-service-points.ejs' : '../company/employees.ejs',
+    areas,
     branches,
+    selectedArea: areaId,
     selectedBranch: branchId,
     employmentStatus,
     searchTerm: search,
@@ -304,8 +318,10 @@ export const renderBranchEmployees = async (req, res) => {
 };
 
 export const renderBranchCustomers = async (req, res) => {
-  const { branchId, search, page = 1, customerId } = req.query;
+  const { branchId, search, page = 1, customerId, areaId } = req.query;
   const perPage = 20;
+  const areas = await getAreasData();
+
   let customers = [];
   let totalCustomers = 0;
   let selectedCustomer = null;
@@ -370,7 +386,9 @@ export const renderBranchCustomers = async (req, res) => {
     description: 'Thống kê khách hàng chi nhánh Samurai Sushi',
     content: '../pages/statistics/company/company.ejs',
     contentPath: '../company/customers.ejs',
+    areas,
     branches,
+    selectedArea: areaId,
     selectedBranch: branchId,
     searchTerm: search,
     customers,
@@ -385,7 +403,8 @@ export const renderBranchCustomers = async (req, res) => {
 };
 
 export const renderBranchInvoices = async (req, res) => {
-  const { branchId, search, page = 1, startDate, endDate } = req.query;
+  const { branchId, search, page = 1, startDate, endDate, areaId } = req.query;
+  const areas = await getAreasData();
   const perPage = 20;
   let invoices = [];
   let totalInvoices = 0;
@@ -428,7 +447,9 @@ export const renderBranchInvoices = async (req, res) => {
     description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
     content: '../pages/statistics/company/company.ejs',
     contentPath: '../company/invoices.ejs',
+    areas,
     branches,
+    selectedArea: areaId,
     selectedBranch: branchId,
     searchTerm: search,
     startDate,
@@ -444,21 +465,22 @@ export const renderBranchInvoices = async (req, res) => {
 };
 
 export const getEditEmployee = async (req, res) => {
-  const { branchId, employeeId } = req.query;
+  const { branchId, employeeId, areaId } = req.query;
+  const areas = await getAreasData();
 
   if (!employeeId) {
-    return res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+    return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
   }
 
   try {
     const employee = await db('EMPLOYEE')
       .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
-      .where('EMPLOYEE.employee_id', employeeId) 
+      .where('EMPLOYEE.employee_id', employeeId)
       .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
       .first();
 
     if (!employee) {
-      return res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+      return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
     }
 
     const departments = await db('DEPARTMENT').select('name');
@@ -470,12 +492,13 @@ export const getEditEmployee = async (req, res) => {
       content: '../pages/statistics/company/company.ejs',
       contentPath: '../company/edit-employee.ejs',
       path: '/thong-ke/cong-ty/nhan-vien',
+      areas,
+      selectedArea: areaId,
       branches,
       selectedBranch: branchId,
       employee,
       departments
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');
@@ -484,61 +507,64 @@ export const getEditEmployee = async (req, res) => {
 
 export const postEditEmployee = async (req, res) => {
   const { employee_id } = req.body;
-  const { branchId, type } = req.query;
+  const { areaId, branchId, type } = req.query;
 
   try {
     if (type === 'personal') {
       const { name, address, phone_number } = req.body;
-      
-      await db('EMPLOYEE')
-        .where('employee_id', employee_id)
-        .update({
-          name,
-          address,
-          phone_number
-        });
-    } 
-    else if (type === 'transfer') {
+
+      await db('EMPLOYEE').where('employee_id', employee_id).update({
+        name,
+        address,
+        phone_number
+      });
+    } else if (type === 'transfer') {
       const { department, branch } = req.body;
-      
+
       // Get department_id and basic_salary from department name
-      const departmentRecord = await db('DEPARTMENT')
-        .where('name', department)
-        .select('department_id', 'basic_salary')
-        .first();
-      
+      const departmentRecord = await db('DEPARTMENT').where('name', department).select('department_id', 'basic_salary').first();
+
       if (!departmentRecord) {
         return res.status(400).send('Invalid department');
       }
-    
-      // Create work history record
-      await db('EMPLOYEE_WORK_HISTORY')
-        .where({ 
+
+      // Check if there's an existing active work history
+      const currentWorkHistory = await db('EMPLOYEE_WORK_HISTORY')
+        .where({
           employee_id,
-          end_date: null 
+          end_date: null
         })
-        .update({ 
-          end_date: new Date() 
-        });
-    
+        .first();
+
+      // If there is an active work history, update its end date
+      if (currentWorkHistory) {
+        await db('EMPLOYEE_WORK_HISTORY')
+          .where({
+            employee_id,
+            end_date: null
+          })
+          .update({
+            end_date: new Date()
+          });
+      }
+
+      // Create new work history record
       await db('EMPLOYEE_WORK_HISTORY').insert({
         employee_id,
         branch_id: branch,
         department_id: departmentRecord.department_id,
         start_date: new Date()
       });
-    
-      // Update employee record with new department, branch and salary
-      await db('EMPLOYEE')
-        .where('employee_id', employee_id)
-        .update({
-          department_id: departmentRecord.department_id,
-          branch_id: branch,
-          salary: departmentRecord.basic_salary // Add salary update
-        });
+
+      // Update employee record
+      await db('EMPLOYEE').where('employee_id', employee_id).update({
+        department_id: departmentRecord.department_id,
+        branch_id: branch,
+        salary: departmentRecord.basic_salary
+      });
     }
 
-    res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+    res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Server Error');

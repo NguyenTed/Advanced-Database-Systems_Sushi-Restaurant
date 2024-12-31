@@ -5,7 +5,7 @@
 <div class="max-w-6xl mx-auto">
     <!-- Back Button -->
     <div class="mb-6">
-        <a href="?branchId=<%= selectedBranch %>" 
+        <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>" 
            class="inline-flex items-center text-red-600 hover:text-red-700">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -29,19 +29,19 @@
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Chọn giai đoạn thống kê</h2>
         <div class="flex justify-center space-x-4">
-            <a href="?branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=day"
+            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=day"
                 class="text-lg rounded-full <%= selectedPeriod === 'day' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                 Ngày
             </a>
-            <a href="?branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=month"
+            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=month"
                 class="text-lg rounded-full <%= selectedPeriod === 'month' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                 Tháng
             </a>
-            <a href="?branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=quarter"
+            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=quarter"
                 class="text-lg rounded-full <%= selectedPeriod === 'quarter' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                 Quý
             </a>
-            <a href="?branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=year"
+            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= selectedEmployee.employee_id %>&period=year"
                 class="text-lg rounded-full <%= selectedPeriod === 'year' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                 Năm
             </a>

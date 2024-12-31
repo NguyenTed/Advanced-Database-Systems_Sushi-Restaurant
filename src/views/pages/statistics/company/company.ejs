@@ -1,49 +1,83 @@
 <div class="bg-gray-50 py-8">
-    <div class="container mx-auto px-4">
+  <div class="container mx-auto px-4">
+    <!-- Area and Branch Selection -->
+    <div class="max-w-6xl mx-auto mb-6 space-y-4">
+      <!-- Area Selection -->
+      <div>
+        <label for="area" class="block font-semibold mb-2">Khu vực</label>
+        <select id="areaSelect" name="area" class="w-full p-3 border rounded-lg" onchange="updateArea(this.value)">
+          <option value="">Chọn khu vực</option>
+          <% areas.forEach(area=> { %>
+            <option value="<%= area.area_id %>" <%=selectedArea==area.area_id ? 'selected' : '' %>
+              <%= area.branchCount===0 ? 'disabled' : '' %>>
+                <%= area.name %> (<%= area.branchCount %>)
+            </option>
+            <% }); %>
+        </select>
+      </div>
+
       <!-- Branch Selection -->
-      <div class="max-w-6xl mx-auto mb-6">
+      <div>
         <label for="branch" class="block font-semibold mb-2">Chi nhánh</label>
-        <select id="branchSelect" name="branch" class="w-full p-3 border rounded-lg" onchange="updateBranch(this.value)">
+        <select id="branchSelect" name="branch" class="w-full p-3 border rounded-lg" onchange="updateBranch(this.value)"
+          <%=!selectedArea || areas.find(a=> a.area_id == selectedArea)?.branchCount === 0 ? 'disabled' : '' %>>
           <option value="">Chọn chi nhánh</option>
-          <% branches.forEach(branch=> { %>
+          <% branches.filter(branch=> !selectedArea || branch.area_id == selectedArea)
+            .forEach(branch => { %>
             <option value="<%= branch.branch_id %>" <%=selectedBranch==branch.branch_id ? 'selected' : '' %>>
               <%= branch.name %>
             </option>
             <% }); %>
         </select>
       </div>
-  
+
       <!-- Navigation Tabs -->
       <div class="max-w-6xl mx-auto mb-6 flex justify-center space-x-4">
-        <a href="/thong-ke/cong-ty/doanh-thu<%= selectedBranch ? '?branchId=' + selectedBranch : '' %>"
+        <a href="/thong-ke/cong-ty/doanh-thu<%= selectedArea ? '?areaId=' + selectedArea : '' %><%= selectedBranch ? (selectedArea ? '&' : '?') + 'branchId=' + selectedBranch : '' %>"
           class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/doanh-thu' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
           Doanh thu
         </a>
-        <a href="/thong-ke/cong-ty/nhan-vien<%= selectedBranch ? '?branchId=' + selectedBranch : '' %>"
+        <a href="/thong-ke/cong-ty/nhan-vien<%= selectedArea ? '?areaId=' + selectedArea : '' %><%= selectedBranch ? (selectedArea ? '&' : '?') + 'branchId=' + selectedBranch : '' %>"
           class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/nhan-vien' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
           Nhân viên
         </a>
-        <a href="/thong-ke/cong-ty/khach-hang<%= selectedBranch ? '?branchId=' + selectedBranch : '' %>"
+        <a href="/thong-ke/cong-ty/khach-hang<%= selectedArea ? '?areaId=' + selectedArea : '' %><%= selectedBranch ? (selectedArea ? '&' : '?') + 'branchId=' + selectedBranch : '' %>"
           class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/khach-hang' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
           Khách hàng
         </a>
-        <a href="/thong-ke/cong-ty/hoa-don<%= selectedBranch ? '?branchId=' + selectedBranch : '' %>"
+        <a href="/thong-ke/cong-ty/hoa-don<%= selectedArea ? '?areaId=' + selectedArea : '' %><%= selectedBranch ? (selectedArea ? '&' : '?') + 'branchId=' + selectedBranch : '' %>"
           class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/hoa-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
           Hóa đơn
         </a>
       </div>
-  
+
       <!-- Content Section -->
       <% if (typeof contentPath !=='undefined' ) { %>
         <%- include(contentPath) %>
           <% } %>
     </div>
   </div>
-  
+
   <script>
+    function updateArea(areaId) {
+      const url=new URL(window.location.href);
+      if (areaId) {
+        url.searchParams.set('areaId', areaId);
+        url.searchParams.delete('branchId'); // Clear branch selection when area changes
+      } else {
+        url.searchParams.delete('areaId');
+        url.searchParams.delete('branchId');
+      }
+      window.location.href=url.toString();
+    }
+
     function updateBranch(branchId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('branchId', branchId);
-      window.location.href = url.toString();
+      const url=new URL(window.location.href);
+      if (branchId) {
+        url.searchParams.set('branchId', branchId);
+      } else {
+        url.searchParams.delete('branchId');
+      }
+      window.location.href=url.toString();
     }
   </script>

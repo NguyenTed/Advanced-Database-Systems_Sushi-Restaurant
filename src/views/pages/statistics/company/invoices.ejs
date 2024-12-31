@@ -85,7 +85,7 @@
             <% if (pagination.totalPages> 1) { %>
               <!-- Previous Page -->
               <% if (pagination.currentPage> 1) { %>
-                <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                   ←
                 </a>
@@ -96,7 +96,7 @@
                     const showEllipsisEnd = pagination.currentPage < pagination.totalPages - pageBuffer; for(let i=1; i
                       <=pagination.totalPages; i++) { if (i===1 || i===pagination.totalPages || (i>=
                       pagination.currentPage - pageBuffer && i <= pagination.currentPage + pageBuffer)) { %>
-                        <a href="?branchId=<%= selectedBranch %>&page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                        <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= i %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
                           class="px-4 py-2 rounded-lg <%= pagination.currentPage === i ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
                           <%= i %>
                         </a>
@@ -124,7 +124,7 @@
 
                             <!-- Next Page -->
                             <% if (pagination.currentPage < pagination.totalPages) { %>
-                              <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                              <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= searchTerm ? '&search=' + searchTerm : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                 →
                               </a>

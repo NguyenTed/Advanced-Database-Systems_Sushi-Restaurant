@@ -6,19 +6,19 @@
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Chọn giai đoạn thống kê</h2>
             <div class="flex justify-center space-x-4">
-                <a href="/thong-ke/cong-ty/doanh-thu?period=day<%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                <a href="/thong-ke/cong-ty/doanh-thu?period=day<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
                     class="text-lg rounded-full <%= selectedPeriod === 'day' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                     Ngày
                 </a>
-                <a href="/thong-ke/cong-ty/doanh-thu?period=month<%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                <a href="/thong-ke/cong-ty/doanh-thu?period=month<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
                     class="text-lg rounded-full <%= selectedPeriod === 'month' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                     Tháng
                 </a>
-                <a href="/thong-ke/cong-ty/doanh-thu?period=quarter<%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                <a href="/thong-ke/cong-ty/doanh-thu?period=quarter<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
                     class="text-lg rounded-full <%= selectedPeriod === 'quarter' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                     Quý
                 </a>
-                <a href="/thong-ke/cong-ty/doanh-thu?period=year<%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                <a href="/thong-ke/cong-ty/doanh-thu?period=year<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
                     class="text-lg rounded-full <%= selectedPeriod === 'year' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
                     Năm
                 </a>

@@ -73,13 +73,14 @@
                                         }).format(employee.salary) %>
                                 </td>
                                 <td class="text-center py-3">
-                                    <a href="?branchId=<%= selectedBranch %>&employeeId=<%= employee.employee_id %>"
+                                    <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= employee.employee_id %>"
                                         class="text-red-600 hover:text-red-700 font-medium">
                                         Xem thống kê
                                     </a>
                                 </td>
                                 <td class="text-center py-3">
-                                    <a href="/thong-ke/cong-ty/chinh-sua-nhan-vien?branchId=<%= selectedBranch %>&employeeId=<%= employee.employee_id %>" class="text-blue-600 hover:text-blue-700 font-medium">
+                                    <a href="/thong-ke/cong-ty/chinh-sua-nhan-vien?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&employeeId=<%= employee.employee_id %>"
+                                        class="text-blue-600 hover:text-blue-700 font-medium">
                                         Chỉnh sửa
                                     </a>
                                 </td>
@@ -112,7 +113,7 @@
                     <% if (pagination.totalPages> 1) { %>
                         <!-- Previous Page -->
                         <% if (pagination.currentPage> 1) { %>
-                            <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage - 1 %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                 class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                 ←
                             </a>
@@ -124,7 +125,7 @@
                                         for(let i=1; i <=pagination.totalPages; i++) { if (i===1 ||
                                         i===pagination.totalPages || (i>= pagination.currentPage - pageBuffer && i <=
                                             pagination.currentPage + pageBuffer)) { %>
-                                            <a href="?branchId=<%= selectedBranch %>&page=<%= i %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                                            <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= i %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                                 class="px-4 py-2 rounded-lg <%= pagination.currentPage === i ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' %> transition-colors">
                                                 <%= i %>
                                             </a>
@@ -153,7 +154,7 @@
 
                                                     <!-- Next Page -->
                                                     <% if (pagination.currentPage < pagination.totalPages) { %>
-                                                        <a href="?branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
+                                                        <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&page=<%= pagination.currentPage + 1 %><%= employmentStatus ? '&employmentStatus=' + employmentStatus : '' %><%= searchTerm ? '&search=' + searchTerm : '' %>"
                                                             class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
                                                             →
                                                         </a>
