@@ -1,3 +1,7 @@
+import passport from 'passport';
+import bcrypt from 'bcrypt';
+import { db } from '../config/db.js';
+
 export const renderLogInPage = (req, res) => {
   const error_msg = req.flash('error_msg'); // Retrieve the flash error
   console.log('Retrieved flash message:', error_msg); // Check the message
