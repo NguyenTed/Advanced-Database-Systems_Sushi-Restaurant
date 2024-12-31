@@ -19,36 +19,67 @@ routes.get("/dat-ban", async (req, res) => {
   }
 });
 
-routes.post('/dat-ban', async (req, res) => {
-  // Lấy thông tin 
-  console.log(req.body); 
-  const { branch_id, name, phone, date, time, guests } = req.body;
+routes.get("/api/branches/:branchId/dishes", async (req, res) => {
+  const { branchId } = req.params;
 
-  try {    
+  try {
+    const dishes = await db("dish")
+      .join("branch_dish_availability", "dish.dish_id", "branch_dish_availability.dish_id")
+      .where("branch_dish_availability.branch_id", branchId)
+      .select("dish.dish_id", "dish.name", "dish.price");
+
+    res.json(dishes);
+  } catch (error) {
+    console.error("Error fetching dishes:", error.message);
+    res.status(500).send("Error loading dishes");
+  }
+});
+
+routes.post('/dat-ban', async (req, res) => {
+  const { branch_id, name, phone, date, time, guests, dishes } = req.body;
+
+  try {
     // Chọn bàn với capacity phù hợp
     const table = await db('table')
-        .select('table_id')
-        .where('branch_id', branch_id)
-        .andWhere('capacity', '>=', guests)
-        .orderByRaw('RAND()')
-        .first();
-    if (!table) 
-        return res.status(400).send('Không có bàn phù hợp tại chi nhánh');
+      .select('table_id')
+      .where('branch_id', branch_id)
+      .andWhere('capacity', '>=', guests)
+      .orderByRaw('RAND()')
+      .first();
+    if (!table) {
+      return res.status(400).send('Không có bàn phù hợp tại chi nhánh');
+    }
     const table_id = table.table_id;
 
+    // Tạo order và lưu vào bảng order
     const reservationDate = new Date(`${date}T${time}`);
     const [order_id] = await db('order').insert({
-        creation_date: new Date(),
-        status: 'Pending',
-        branch_id: branch_id,
+      creation_date: new Date(),
+      status: 'Pending',
+      branch_id: branch_id,
     }).returning('order_id');
+
+    // Lưu vào bảng eat_in_order
     await db('eat_in_order').insert({
-        eat_in_order_id: order_id,
-        serving_date: reservationDate,
-        num_guest: guests,
-        branch_id: branch_id,
-        table_id: table_id,
-      });      
+      eat_in_order_id: order_id,
+      serving_date: reservationDate,
+      num_guest: guests,
+      branch_id: branch_id,
+      table_id: table_id,
+    });
+
+    // Lưu thông tin các món ăn vào bảng order_detail
+    const orderDetails = Object.entries(dishes)
+      .filter(([_, quantity]) => quantity > 0) // Lọc các món có số lượng > 0
+      .map(([dish_id, quantity]) => ({
+        order_id: order_id,
+        dish_id: parseInt(dish_id) + 1,
+        quantity: parseInt(quantity),
+      }));
+
+    if (orderDetails.length > 0) {
+      await db('order_detail').insert(orderDetails);
+    }
 
     // Render giao diện thành công
     const branch = await db.select('name').where('branch_id', branch_id).from('branch').first();
@@ -62,13 +93,12 @@ routes.post('/dat-ban', async (req, res) => {
       guests,
       table_id,
       reservationDate,
-      branch_name: branch_name, 
+      branch_name: branch_name,
     });
 
-  } 
-  catch (error) {
-      console.error('Error saving reservation:', error);
-      res.status(500).send('Đặt bàn thất bại!');
+  } catch (error) {
+    console.error('Error saving reservation:', error);
+    res.status(500).send('Đặt bàn thất bại!');
   }
 });
 

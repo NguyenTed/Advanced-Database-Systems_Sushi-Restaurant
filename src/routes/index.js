@@ -9,7 +9,6 @@ import branchStatisticsRoute from './branch-statistics-route.js';
 import companyStatisticsRoute from './company-statistics-route.js';
 import policiesRoute from './policies-route.js';
 import profileRoute from './profile-route.js';
-import { verifyRole } from '../middlewares/auth-middleware.js';
 
 const routes = Router();
 routes.use((req, res, next) => {

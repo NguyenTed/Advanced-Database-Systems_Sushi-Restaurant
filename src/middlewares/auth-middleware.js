@@ -36,12 +36,13 @@ export const verifyRole = (allowedRoles) => {
     }
     if (!allowedRoles.includes(account.role)) {
       // Chuyển hướng hoặc render trang Forbidden
-      console.log(allowedRoles);
       return res.status(403).render('layout/main-layout.ejs', {
         title: '403 - Không có quyền',
         description: 'Bạn không có quyền truy cập địa chỉ này',
         content: '../pages/403'
       });
     }
+
+    next();
   };
 };
