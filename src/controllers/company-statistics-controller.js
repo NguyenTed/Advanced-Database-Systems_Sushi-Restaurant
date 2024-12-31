@@ -442,3 +442,104 @@ export const renderBranchInvoices = async (req, res) => {
     }
   });
 };
+
+export const getEditEmployee = async (req, res) => {
+  const { branchId, employeeId } = req.query;
+
+  if (!employeeId) {
+    return res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+  }
+
+  try {
+    const employee = await db('EMPLOYEE')
+      .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
+      .where('EMPLOYEE.employee_id', employeeId) 
+      .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
+      .first();
+
+    if (!employee) {
+      return res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+    }
+
+    const departments = await db('DEPARTMENT').select('name');
+    const branches = await db('branch'); // Need branches for company layout
+
+    res.render('layout/main-layout', {
+      title: 'Chỉnh sửa nhân viên | Samurai Sushi',
+      description: 'Chỉnh sửa thông tin nhân viên',
+      content: '../pages/statistics/company/company.ejs',
+      contentPath: '../company/edit-employee.ejs',
+      branches,
+      selectedBranch: branchId,
+      employee,
+      departments
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+export const postEditEmployee = async (req, res) => {
+  const { employee_id } = req.body;
+  const { branchId, type } = req.query;
+
+  try {
+    if (type === 'personal') {
+      const { name, address, phone_number } = req.body;
+      
+      await db('EMPLOYEE')
+        .where('employee_id', employee_id)
+        .update({
+          name,
+          address,
+          phone_number
+        });
+    } 
+    else if (type === 'transfer') {
+      const { department, branch } = req.body;
+      
+      // Get department_id and basic_salary from department name
+      const departmentRecord = await db('DEPARTMENT')
+        .where('name', department)
+        .select('department_id', 'basic_salary')
+        .first();
+      
+      if (!departmentRecord) {
+        return res.status(400).send('Invalid department');
+      }
+    
+      // Create work history record
+      await db('EMPLOYEE_WORK_HISTORY')
+        .where({ 
+          employee_id,
+          end_date: null 
+        })
+        .update({ 
+          end_date: new Date() 
+        });
+    
+      await db('EMPLOYEE_WORK_HISTORY').insert({
+        employee_id,
+        branch_id: branch,
+        department_id: departmentRecord.department_id,
+        start_date: new Date()
+      });
+    
+      // Update employee record with new department, branch and salary
+      await db('EMPLOYEE')
+        .where('employee_id', employee_id)
+        .update({
+          department_id: departmentRecord.department_id,
+          branch_id: branch,
+          salary: departmentRecord.basic_salary // Add salary update
+        });
+    }
+
+    res.redirect('/thong-ke/cong-ty/nhan-vien?branchId=' + branchId);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};

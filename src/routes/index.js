@@ -7,7 +7,8 @@ import membershipRoute from './membership-route.js';
 import reservationRoute from './reservation-route.js';
 import promotionsRoute from './promotions-route.js';
 import accountRoute from './account-route.js';
-import statisticsRoute from './branch-statistics-route.js';
+import branchStatisticsRoute from './branch-statistics-route.js';
+import companyStatisticsRoute from './company-statistics-route.js';
 import policiesRoute from './policies-route.js';
 
 const routes = Router();
@@ -19,7 +20,8 @@ routes.use((req, res, next) => {
 routes.use('/tai-khoan', authRoute);
 routes.use(homeRoute);
 routes.use(menuRoute);
-routes.use(statisticsRoute);
+routes.use(branchStatisticsRoute);
+routes.use(companyStatisticsRoute);
 routes.use(branchRoute);
 routes.use(membershipRoute);
 routes.use(reservationRoute);
