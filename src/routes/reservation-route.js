@@ -1,11 +1,24 @@
 import { Router } from "express";
 import { db } from '../config/db.js';
+import { attachProfile } from '../middlewares/auth-middleware.js';
 
 const routes = Router();
 
+routes.use(attachProfile);
+
+routes.use((req, res, next) => {
+  res.profile = req.profile;
+  next();
+});
+
 routes.get("/dat-ban", async (req, res) => {
   try {
+    if (!req.profile || !req.profile.customer_id) {
+      return res.redirect("/tai-khoan/dang-nhap"); 
+    }
+
     const branches = await db.select("branch_id", "name").from("branch");
+
     res.render("layout/main-layout", {
       title: "Đặt bàn | Samurai Sushi",
       description: "Đặt bàn tại Samurai Sushi",
@@ -14,7 +27,7 @@ routes.get("/dat-ban", async (req, res) => {
     });
   } 
   catch (error) {
-    console.error("Error fetching branches:", error.message); // 
+    console.error("Error fetching branches:", error.message); 
     res.status(500).send("Error loading branch");
   }
 });
@@ -36,7 +49,8 @@ routes.get("/api/branches/:branchId/dishes", async (req, res) => {
 });
 
 routes.post('/dat-ban', async (req, res) => {
-  const { branch_id, name, phone, date, time, guests, dishes } = req.body;
+  const { branch_id, name, phone, date, time, guests, dishes } = req.body;  
+  const { customer_id } = req.profile.customer_id;
 
   try {
     // Chọn bàn với capacity phù hợp
@@ -57,6 +71,7 @@ routes.post('/dat-ban', async (req, res) => {
       creation_date: new Date(),
       status: 'Pending',
       branch_id: branch_id,
+      customer_id: req.profile.customer_id,
     }).returning('order_id');
 
     // Lưu vào bảng eat_in_order

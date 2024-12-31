@@ -1,7 +1,7 @@
 import { db } from '../config/db.js'; // Import the Knex instance
 
 export const attachProfile = async (req, res, next) => {
-  if (req.isAuthenticated() && req.user) {
+  if (req.isAuthenticated && req.user) {
     try {
       let profile = {};
       if (req.user.role === 'Khách hàng') {
