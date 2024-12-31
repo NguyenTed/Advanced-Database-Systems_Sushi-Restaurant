@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRoute from './auth-route.js';
 import homeRoute from './home-route.js';
 import menuRoute from './menu-route.js';
 import branchRoute from './branch-route.js';
@@ -15,6 +16,7 @@ routes.use((req, res, next) => {
   next();
 });
 
+routes.use('/tai-khoan', authRoute);
 routes.use(homeRoute);
 routes.use(menuRoute);
 routes.use(statisticsRoute);

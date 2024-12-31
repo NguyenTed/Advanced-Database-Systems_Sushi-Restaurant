@@ -12,8 +12,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "chart.js": "^4.4.7",
     "connect-flash": "^0.1.1",
+    "connect-session-knex": "^5.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
@@ -22,6 +24,9 @@
     "knex": "^3.1.0",
     "mysql2": "^3.11.4",
     "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-ejs": "^1.0.3",
     "passport-local": "^1.0.0",
     "prettier": "^3.4.2",
     "prettier-plugin-ejs": "^1.0.3"
