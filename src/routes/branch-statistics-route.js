@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { renderBranchStatistics, renderBranchRevenue, renderBranchEmployees, renderBranchCustomers, renderBranchInvoices } from '../controllers/branch-statistics-controller.js';
 
 const routes = Router();
-
 routes.use((req, res, next) => {
   res.locals.path = req.path;
   next();

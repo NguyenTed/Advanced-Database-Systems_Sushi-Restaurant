@@ -1,0 +1,232 @@
+<% const shouldShowContent=(selectedPeriod==='day' && selectedYear && selectedMonth) || (['month', 'quarter'
+    ].includes(selectedPeriod) && selectedYear) || selectedPeriod==='year' %>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Period Selection -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Chọn giai đoạn thống kê</h2>
+            <div class="flex justify-center space-x-4">
+                <a href="/thong-ke/cong-ty/doanh-thu?period=day<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                    class="text-lg rounded-full <%= selectedPeriod === 'day' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                    Ngày
+                </a>
+                <a href="/thong-ke/cong-ty/doanh-thu?period=month<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                    class="text-lg rounded-full <%= selectedPeriod === 'month' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                    Tháng
+                </a>
+                <a href="/thong-ke/cong-ty/doanh-thu?period=quarter<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                    class="text-lg rounded-full <%= selectedPeriod === 'quarter' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                    Quý
+                </a>
+                <a href="/thong-ke/cong-ty/doanh-thu?period=year<%= selectedArea ? '&areaId=' + selectedArea : '' %><%= selectedBranch ? '&branchId=' + selectedBranch : '' %>"
+                    class="text-lg rounded-full <%= selectedPeriod === 'year' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+                    Năm
+                </a>
+            </div>
+
+            <!-- Time Period Selection -->
+            <% if (selectedBranch) { %>
+                <div class="mt-6 flex justify-center space-x-4">
+                    <% if (selectedPeriod==='day' ) { %>
+                        <!-- Daily Statistics - Year & Month Selection -->
+                        <div class="flex space-x-4">
+                            <select id="yearSelect" class="p-2 border rounded-lg" onchange="updateTimePeriod()">
+                                <option value="">Chọn năm</option>
+                                <% availableYears.forEach(y=> { %>
+                                    <option value="<%= y.year %>" <%=selectedYear==y.year ? 'selected' : '' %>>
+                                        <%= y.year %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+
+                            <% if (selectedYear) { %>
+                                <select id="monthSelect" class="p-2 border rounded-lg" onchange="updateTimePeriod()">
+                                    <option value="">Chọn tháng</option>
+                                    <% for(let i=1; i <=12; i++) { %>
+                                        <option value="<%= i %>" <%=selectedMonth==i ? 'selected' : '' %>>
+                                            <%= String(i).padStart(2, '0' ) %>
+                                        </option>
+                                        <% } %>
+                                </select>
+                                <% } %>
+                        </div>
+                        <% } else if (['month', 'quarter' ].includes(selectedPeriod)) { %>
+                            <!-- Monthly/Quarterly Statistics - Year Selection -->
+                            <select id="yearSelect" class="p-2 border rounded-lg" onchange="updateTimePeriod()">
+                                <option value="">Chọn năm</option>
+                                <% availableYears.forEach(y=> { %>
+                                    <option value="<%= y.year %>" <%=selectedYear==y.year ? 'selected' : '' %>>
+                                        <%= y.year %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                            <% } else if (selectedPeriod==='year' ) { %>
+                                <!-- Yearly Statistics - Limit Selection -->
+                                <div class="flex items-center space-x-8">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-gray-700">Hiển thị</span>
+                                        <input type="number" id="yearLimit" min="1" max="10"
+                                            value="<%= yearLimit || 5 %>"
+                                            class="w-16 p-2 border rounded-lg text-center">
+                                        <span class="text-gray-700">năm gần nhất</span>
+                                    </div>
+                                    <button onclick="updateYearLimit()"
+                                        class="ml-6 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 hover:scale-105 transition-all">
+                                        Cập nhật
+                                    </button>
+                                </div>
+                                <% } %>
+                </div>
+                <% } %>
+        </div>
+
+        <!-- Content Section -->
+        <% if (selectedBranch) { %>
+            <% if (shouldShowContent && revenueData.length> 0) { %>
+                <!-- Revenue Chart -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+
+                <!-- Revenue Table -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-3">Thời gian</th>
+                                <th class="text-right py-3">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% revenueData.forEach(data=> { %>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-3">
+                                        <% let formattedDate; switch(selectedPeriod) { case 'day' : formattedDate=new
+                                            Date(data.date).toLocaleDateString('vi-VN', {day: '2-digit' ,
+                                            month: '2-digit' , year: 'numeric' }); break; case 'month' : const [year,
+                                            month]=data.date.split('-'); formattedDate=`${month}/${year}`; break;
+                                            case 'quarter' : const [yearQ, quarter]=data.date.split('-Q');
+                                            formattedDate=`Q${quarter}/${yearQ}`; break; default:
+                                            formattedDate=data.date; } %>
+                                            <%= formattedDate %>
+                                    </td>
+                                    <td class="text-right">
+                                        <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                            }).format(data.revenue) %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <!-- Sum Row -->
+                                    <tr class="border-t-2 border-gray-200 font-bold">
+                                        <td class="py-3">Tổng cộng</td>
+                                        <td class="text-right">
+                                            <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                                }).format(revenueData.reduce((sum, data)=> sum + Number(data.revenue),
+                                                0)) %>
+                                        </td>
+                                    </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else if (shouldShowContent) { %>
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+                        Không có dữ liệu doanh thu cho giai đoạn này
+                    </div>
+                    <% } else { %>
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+                            <% if (selectedPeriod==='day' ) { %>
+                                Vui lòng chọn năm và tháng để xem thống kê theo ngày
+                                <% } else if (['month', 'quarter' ].includes(selectedPeriod)) { %>
+                                    Vui lòng chọn năm để xem thống kê
+                                    <% } %>
+                        </div>
+                        <% } %>
+                            <% } else { %>
+                                <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+                                    Vui lòng chọn chi nhánh để xem doanh thu
+                                </div>
+                                <% } %>
+    </div>
+
+    <script>
+        function updateTimePeriod() {
+            const url=new URL(window.location.href);
+            const yearSelect=document.getElementById('yearSelect');
+            const monthSelect=document.getElementById('monthSelect');
+
+            if (yearSelect&&yearSelect.value) {
+                url.searchParams.set('year', yearSelect.value);
+            } else {
+                url.searchParams.delete('year');
+            }
+
+            if (monthSelect&&monthSelect.value) {
+                url.searchParams.set('month', monthSelect.value);
+            } else {
+                url.searchParams.delete('month');
+            }
+
+            window.location.href=url.toString();
+        }
+
+        function updateYearLimit() {
+            const url=new URL(window.location.href);
+            const yearLimit=document.getElementById('yearLimit').value;
+            url.searchParams.set('yearLimit', yearLimit);
+            window.location.href=url.toString();
+        }
+    </script>
+
+    <% if (shouldShowContent && revenueData.length> 0) { %>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx=document.getElementById('revenueChart').getContext('2d');
+            const data= <%- JSON.stringify(revenueData)%>;
+
+            // Format dates for chart labels
+            const labels=data.map(d => {
+                switch ('<%= selectedPeriod %>') {
+                    case 'day':
+                        return new Date(d.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    case 'month':
+                        const [year, month]=d.date.split('-');
+                        return `${month}/${year}`;
+                    case 'quarter':
+                        const [yearQ, quarter]=d.date.split('-Q');
+                        return `Q${quarter}/${yearQ}`;
+                    default:
+                        return d.date;
+                }
+            });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data.map(d => d.revenue),
+                        borderColor: 'rgb(220, 38, 38)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                        maximumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+        <% } %>

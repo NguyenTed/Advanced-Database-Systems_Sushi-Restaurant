@@ -4,6 +4,14 @@
     <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
       <h1 class="text-3xl font-bold text-gray-800 text-center mb-8">Đăng ký tài khoản</h1>
 
+      <% if (errors && errors.length > 0) { %>
+      <div class="bg-red-100 text-red-600 p-4 mb-4 rounded">
+        <% errors.forEach(error => { %>
+        <p><%= error.msg %></p>
+        <% }) %>
+      </div>
+      <% } %>
+
       <form class="space-y-6" method="post" action="/tai-khoan/dang-ky">
         <!-- Full Name -->
         <div>
