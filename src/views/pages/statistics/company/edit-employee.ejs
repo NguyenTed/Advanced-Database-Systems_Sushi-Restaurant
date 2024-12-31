@@ -2,8 +2,8 @@
 <div class="max-w-6xl mx-auto">
     <!-- Back Button -->
     <div class="mb-6">
-        <a href="/thong-ke/cong-ty/nhan-vien?branchId=<%= selectedBranch %>" 
-           class="inline-flex items-center text-red-600 hover:text-red-700">
+        <a href="/thong-ke/cong-ty/nhan-vien?branchId=<%= selectedBranch %>"
+            class="inline-flex items-center text-red-600 hover:text-red-700">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -19,14 +19,14 @@
                     <h3 class="font-medium text-gray-700">Quản lý nhân viên</h3>
                 </div>
                 <nav class="space-y-1">
-                    <a href="#personal-info" 
-                       class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
-                       onclick="showSection('personal-info')">
+                    <a href="#personal-info"
+                        class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
+                        onclick="showSection('personal-info', event)">
                         Thông tin cá nhân
                     </a>
-                    <a href="#transfer" 
-                       class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
-                       onclick="showSection('transfer')">
+                    <a href="#transfer"
+                        class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-700"
+                        onclick="showSection('transfer', event)">
                         Chuyển nhân sự
                     </a>
                 </nav>
@@ -38,36 +38,32 @@
             <!-- Personal Information Section -->
             <div id="personal-info" class="bg-white p-6 rounded-lg shadow-md mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">Thông tin cá nhân</h2>
-                <form action="/thong-ke/cong-ty/chinh-sua-nhan-vien?branchId=<%= selectedBranch %>&type=personal" method="POST">
+                <form action="/thong-ke/cong-ty/chinh-sua-nhan-vien?branchId=<%= selectedBranch %>&type=personal"
+                    method="POST">
                     <input type="hidden" name="employee_id" value="<%= employee.employee_id %>">
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label for="name" class="block text-gray-700 mb-2">Tên nhân viên</label>
-                            <input type="text" id="name" name="name" 
-                                   value="<%= employee.name %>" 
-                                   class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" 
-                                   required>
-                        </div>
-                        
-                        <div>
-                            <label for="address" class="block text-gray-700 mb-2">Địa chỉ</label>
-                            <input type="text" id="address" name="address" 
-                                   value="<%= employee.address %>" 
-                                   class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" 
-                                   required>
-                        </div>
-                        
-                        <div>
-                            <label for="phone_number" class="block text-gray-700 mb-2">Số điện thoại</label>
-                            <input type="text" id="phone_number" name="phone_number" 
-                                   value="<%= employee.phone_number %>" 
-                                   class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" 
-                                   required>
+                            <input type="text" id="name" name="name" value="<%= employee.name %>"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" required>
                         </div>
 
-                        <button type="submit" 
-                                class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        <div>
+                            <label for="address" class="block text-gray-700 mb-2">Địa chỉ</label>
+                            <input type="text" id="address" name="address" value="<%= employee.address %>"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" required>
+                        </div>
+
+                        <div>
+                            <label for="phone_number" class="block text-gray-700 mb-2">Số điện thoại</label>
+                            <input type="text" id="phone_number" name="phone_number"
+                                value="<%= employee.phone_number %>"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" required>
+                        </div>
+
+                        <button type="submit"
+                            class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
                             Lưu thông tin
                         </button>
                     </div>
@@ -77,40 +73,39 @@
             <!-- Transfer Section -->
             <div id="transfer" class="hidden bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">Chuyển nhân sự</h2>
-                <form action="/thong-ke/cong-ty/chinh-sua-nhan-vien?branchId=<%= selectedBranch %>&type=transfer" method="POST">
+                <form action="/thong-ke/cong-ty/chinh-sua-nhan-vien?branchId=<%= selectedBranch %>&type=transfer"
+                    method="POST">
                     <input type="hidden" name="employee_id" value="<%= employee.employee_id %>">
-                    
+
                     <div class="space-y-4">
                         <div>
                             <label for="department" class="block text-gray-700 mb-2">Bộ phận</label>
-                            <select id="department" name="department" 
-                                    class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" 
-                                    required>
-                                <% departments.forEach(dept => { %>
-                                    <option value="<%= dept.name %>" 
-                                            <%= employee.department_name === dept.name ? 'selected' : '' %>>
+                            <select id="department" name="department"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" required>
+                                <% departments.forEach(dept=> { %>
+                                    <option value="<%= dept.name %>" <%=employee.department_name===dept.name
+                                        ? 'selected' : '' %>>
                                         <%= dept.name %>
                                     </option>
-                                <% }); %>
+                                    <% }); %>
                             </select>
                         </div>
 
                         <div>
                             <label for="branch" class="block text-gray-700 mb-2">Chi nhánh</label>
-                            <select id="branch" name="branch" 
-                                    class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" 
-                                    required>
-                                <% branches.forEach(branch => { %>
-                                    <option value="<%= branch.branch_id %>" 
-                                            <%= employee.branch_id === branch.branch_id ? 'selected' : '' %>>
+                            <select id="branch" name="branch"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500" required>
+                                <% branches.forEach(branch=> { %>
+                                    <option value="<%= branch.branch_id %>" <%=employee.branch_id===branch.branch_id
+                                        ? 'selected' : '' %>>
                                         <%= branch.name %>
                                     </option>
-                                <% }); %>
+                                    <% }); %>
                             </select>
                         </div>
 
-                        <button type="submit" 
-                                class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                        <button type="submit"
+                            class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
                             Lưu thay đổi
                         </button>
                     </div>
@@ -121,27 +116,32 @@
 </div>
 
 <script>
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('#personal-info, #transfer').forEach(section => {
-        section.classList.add('hidden');
-    });
-    
-    // Show selected section
-    document.getElementById(sectionId).classList.remove('hidden');
-    
-    // Update active state in menu
-    document.querySelectorAll('nav a').forEach(link => {
-        if (link.getAttribute('href') === '#' + sectionId) {
-            link.classList.add('bg-red-50', 'text-red-700');
-        } else {
-            link.classList.remove('bg-red-50', 'text-red-700');
+    function showSection(sectionId, e) {
+        // Prevent default anchor behavior if event exists
+        if (e) {
+            e.preventDefault();
         }
-    });
-}
 
-// Show personal info section by default
-document.addEventListener('DOMContentLoaded', () => {
-    showSection('personal-info');
-});
+        // Hide all sections
+        document.querySelectorAll('#personal-info, #transfer').forEach(section => {
+            section.classList.add('hidden');
+        });
+
+        // Show selected section
+        document.getElementById(sectionId).classList.remove('hidden');
+
+        // Update active state in menu
+        document.querySelectorAll('nav a').forEach(link => {
+            if (link.getAttribute('href') === '#' + sectionId) {
+                link.classList.add('bg-red-50', 'text-red-700');
+            } else {
+                link.classList.remove('bg-red-50', 'text-red-700');
+            }
+        });
+    }
+
+    // Show personal info section by default
+    document.addEventListener('DOMContentLoaded', () => {
+        showSection('personal-info', null);
+    });
 </script>

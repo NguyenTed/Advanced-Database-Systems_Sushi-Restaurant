@@ -469,6 +469,7 @@ export const getEditEmployee = async (req, res) => {
       description: 'Chỉnh sửa thông tin nhân viên',
       content: '../pages/statistics/company/company.ejs',
       contentPath: '../company/edit-employee.ejs',
+      path: '/thong-ke/cong-ty/nhan-vien',
       branches,
       selectedBranch: branchId,
       employee,
