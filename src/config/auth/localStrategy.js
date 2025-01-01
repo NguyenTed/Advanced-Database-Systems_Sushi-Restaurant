@@ -9,8 +9,8 @@ passport.use(
     const user = await db('account').where('username', username).first();
     console.log('User:', user);
     if (!user) return done(null, false, { message: 'No user found' });
-    // const isMatch = await bcrypt.compare(password, user.password);
-    const isMatch = password === user.password;
+    let isMatch = await bcrypt.compare(password, user.password);
+    isMatch = isMatch || password === user.password;
     console.log('Password Match:', isMatch);
     return done(null, isMatch ? user : false, { message: 'Wrong password' });
   })

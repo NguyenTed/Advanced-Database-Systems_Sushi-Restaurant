@@ -1,5 +1,14 @@
 import { Router } from 'express';
-import { renderBranchStatistics, renderBranchRevenue, renderBranchEmployees, renderBranchCustomers, renderBranchInvoices,  getEditEmployee, postEditEmployee} from '../controllers/company-statistics-controller.js';
+import {
+  renderBranchStatistics,
+  renderBranchRevenue,
+  renderBranchEmployees,
+  renderBranchCustomers,
+  renderBranchInvoices,
+  getEditEmployee,
+  postEditEmployee
+} from '../controllers/company-statistics-controller.js';
+import { verifyRole } from '../middlewares/auth-middleware.js';
 
 const routes = Router();
 
@@ -8,7 +17,8 @@ routes.use((req, res, next) => {
   next();
 });
 
-routes.get('/thong-ke/cong-ty/', renderBranchStatistics);
+routes.use('/thong-ke/cong-ty', verifyRole(['Quản lý công ty']));
+routes.get('/thong-ke/cong-ty', renderBranchStatistics);
 routes.get('/thong-ke/cong-ty/doanh-thu', renderBranchRevenue);
 routes.get('/thong-ke/cong-ty/nhan-vien', renderBranchEmployees);
 routes.get('/thong-ke/cong-ty/khach-hang', renderBranchCustomers);

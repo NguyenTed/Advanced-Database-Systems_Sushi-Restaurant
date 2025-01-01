@@ -1,47 +1,93 @@
-<main class="container mx-auto px-4 w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/2">
-    <!-- Reservation Section -->
-    <section class="bg-gray-100 py-10">
-    <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Đặt Bàn Ngay</h2>
-        <form action="/dat-ban" method="POST" class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-            <div class="mb-4">
-                <label for="branch_id" class="block text-sm font-medium text-gray-700">Chi nhánh</label>
-                <select id="branch_id" name="branch_id" required
-                  class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-                  <option value="">Chọn chi nhánh</option>
-                  <% branches.forEach(branch => { %>
-                    <option value="<%= branch.branch_id %>"><%= branch.name %></option>
-                  <% }) %>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="name" class="block text-sm font-medium text-gray-700">Họ và tên</label>
-                <input type="text" id="name" name="name" required
-                    class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-            </div>
-            <div class="mb-4">
-                <label for="phone" class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-                <input type="tel" id="phone" name="phone" required
-                    class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-            </div>
-            <div class="mb-4">
-                <label for="date" class="block text-sm font-medium text-gray-700">Ngày đặt</label>
-                <input type="date" id="date" name="date" required
-                    class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-            </div>
-            <div class="mb-4">
-                <label for="time" class="block text-sm font-medium text-gray-700">Giờ đặt</label>
-                <input type="time" id="time" name="time" required
-                    class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-            </div>
-            <div class="mb-4">
-                <label for="guests" class="block text-sm font-medium text-gray-700">Số lượng khách</label>
-                <input type="number" id="guests" name="guests" min="1" max="20" required
-                    class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
-            </div>
-            <button type="submit"
-                class="w-full py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300">Đặt
-                bàn</button>
-        </form>
-    </div>
-</main>
+<form action="/dat-ban" method="POST" class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+  <!-- Chi nhánh -->
+  <div class="mb-4">
+    <label for="branch_id" class="block text-sm font-medium text-gray-700">Chi nhánh</label>
+    <select id="branch_id" name="branch_id" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none">
+      <option value="">Chọn chi nhánh</option>
+      <% branches.forEach(branch => { %>
+      <option value="<%= branch.branch_id %>"><%= branch.name %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <!-- Món ăn -->
+  <div class="mb-4 hidden" id="dishes-section">
+    <label for="dishes" class="block text-sm font-medium text-gray-700">Chọn món ăn</label>
+    <div id="dishes-list" class="mt-1"></div>
+    <div id="total-price" class="text-right text-lg font-bold mt-4 hidden">Tổng: 0 VND</div>
+  </div>
+
+  <!-- Thông tin đặt bàn -->
+  <div class="mb-4">
+    <label for="date" class="block text-sm font-medium text-gray-700">Ngày đặt</label>
+    <input type="date" id="date" name="date" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none" />
+  </div>
+  <div class="mb-4">
+    <label for="time" class="block text-sm font-medium text-gray-700">Giờ đặt</label>
+    <input type="time" id="time" name="time" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none" />
+  </div>
+  <div class="mb-4">
+    <label for="guests" class="block text-sm font-medium text-gray-700">Số lượng khách</label>
+    <input type="number" id="guests" name="guests" min="1" max="20" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-300 focus:outline-none" />
+  </div>
+  <button type="submit" class="w-full py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300">Đặt bàn</button>
+</form>
+
+<script>
+  document.getElementById('branch_id').addEventListener('change', async function () {
+    const branchId = this.value;
+    const dishesSection = document.getElementById('dishes-section');
+    const dishesList = document.getElementById('dishes-list');
+    const totalPriceElement = document.getElementById('total-price');
+
+    if (branchId) {
+      try {
+        // Gọi API để lấy danh sách món ăn
+        const response = await fetch(`/api/branches/${branchId}/dishes`);
+        const dishes = await response.json();
+        console.log(dishes);
+
+        // Hiển thị danh sách món ăn với ô nhập số lượng bên phải
+        if (dishes.length > 0) {
+          dishesList.innerHTML = dishes
+            .map(
+              (dish) => `
+                        <div class="flex items-center mb-2">
+                            <span class="flex-1 text-sm font-medium text-gray-700">${dish.name} - ${dish.price} VND</span>
+                            <input type="number" id="dish-${dish.dish_id}" name="dishes[${dish.dish_id}]" min="0" placeholder="0"
+                                class="w-20 px-2 py-1 border border-gray-300 rounded-md text-right focus:ring-red-300 focus:outline-none" data-price="${dish.price}" onchange="updateTotalPrice()">
+                        </div>
+                    `
+            )
+            .join('');
+          dishesSection.classList.remove('hidden');
+          totalPriceElement.classList.remove('hidden');
+        } else {
+          dishesList.innerHTML = '<p>Không có món ăn khả dụng tại chi nhánh này.</p>';
+          dishesSection.classList.remove('hidden');
+          totalPriceElement.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('Error fetching dishes:', error);
+        dishesList.innerHTML = '<p>Đã xảy ra lỗi khi tải danh sách món ăn.</p>';
+        dishesSection.classList.remove('hidden');
+        totalPriceElement.classList.add('hidden');
+      }
+    } else {
+      dishesSection.classList.add('hidden');
+      dishesList.innerHTML = '';
+      totalPriceElement.classList.add('hidden');
+    }
+  });
+
+  function updateTotalPrice() {
+    const inputs = document.querySelectorAll('#dishes-list input[type="number"]');
+    let total = 0;
+    inputs.forEach((input) => {
+      const quantity = parseInt(input.value) || 0;
+      const price = parseInt(input.dataset.price);
+      total += quantity * price;
+    });
+    document.getElementById('total-price').innerText = `Tổng: ${total.toLocaleString()} VND`;
+  }
+</script>
