@@ -6,7 +6,7 @@ export const attachProfile = async (req, res, next) => {
       let profile = {};
       if (req.user.role === 'Khách hàng') {
         profile = await db('customer').where('account_id', req.user.account_id).first();
-      } else if (req.user.role === 'Nhân viên') {
+      } else {
         profile = await db('employee').where('account_id', req.user.account_id).first();
       }
       req.isAuthenticated = true;
