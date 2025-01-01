@@ -90,7 +90,7 @@
                   </li>
                 </a>
                 <!-- Branch Statistics -->
-                <% if (user.role==='Quản lý chi nhánh' ) { %>
+                <% if (user.role==='Quản lý chi nhánh' || user.role==='Quản lý công ty' ) { %>
                   <a href="/thong-ke/chi-nhanh">
                     <li class='py-2.5 px-5 flex items-center hover:bg-gray-100 text-[#333] text-sm cursor-pointer'>
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24"
