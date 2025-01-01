@@ -24,22 +24,25 @@ export const attachProfile = async (req, res, next) => {
   next();
 };
 
+// src/middlewares/auth-middleware.js
+
 export const verifyRole = (allowedRoles) => {
   return (req, res, next) => {
-    const account = req.user;
-    if (!account) {
-      res.status(401).render('layout/main-layout.ejs', {
+    // Check if user is logged in
+    if (!req.user) {
+      return res.status(401).render('layout/main-layout.ejs', {
         title: '401 - Không hợp lệ',
-        description: 'Thông tin đăng nhập của bạn không hợp lệ',
-        content: '../pages/401'
+        description: 'Vui lòng đăng nhập để tiếp tục',
+        content: '../pages/401.ejs'
       });
     }
-    if (!allowedRoles.includes(account.role)) {
-      // Chuyển hướng hoặc render trang Forbidden
+
+    // Check if user has required role
+    if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).render('layout/main-layout.ejs', {
         title: '403 - Không có quyền',
         description: 'Bạn không có quyền truy cập địa chỉ này',
-        content: '../pages/403'
+        content: '../pages/403.ejs'
       });
     }
 

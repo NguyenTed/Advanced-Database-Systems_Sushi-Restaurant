@@ -1,7 +1,6 @@
 import passport from 'passport';
 import bcrypt from 'bcrypt';
 import { db } from '../config/db.js';
-import { signupNewCustomer } from '../services/auth-service.js';
 
 export const renderLogInPage = (req, res) => {
   const error_msg = req.flash('error_msg'); // Retrieve the flash error
@@ -54,75 +53,45 @@ export const handleSignUp = async (req, res) => {
       contentPath: '../account/register.ejs'
     });
   } else {
-    // const user = await db('account').where('username', username).first();
-    const newUser = {
-      username: username,
-      password: await bcrypt.hash(password, 10),
-      name: name,
-      phone_number: phoneNumber,
-      personal_id: personalId,
-      date_of_birth: date_of_birth,
-      gender: gender,
-      email: email
-    };
-
-    signupNewCustomer(newUser)
-      .then((response) => {
-        if (!response.success) {
-          console.log('Signup failed:', response.message);
-        } else {
-          console.log('Signup successful:', response.message);
-        }
-      })
-      .catch((err) => {
-        console.error('Unexpected error during signup:', err.message);
+    const user = await db('account').where('username', username).first();
+    if (user) {
+      errors.push({ msg: 'User already exists' });
+      res.render('layout/main-layout', {
+        errors,
+        name,
+        phoneNumber,
+        personalId,
+        date_of_birth,
+        gender,
+        email,
+        username,
+        password,
+        title: 'Đăng ký | Samurai Sushi',
+        description: 'Đăng ký thành viên',
+        content: '../pages/account/account.ejs',
+        contentPath: '../account/register.ejs'
       });
-
-    req.flash('success_msg', 'You are now registered and can log in');
-    res.redirect('/tai-khoan/dang-nhap');
-
-    // if (user) {
-    //   errors.push({ msg: 'User already exists' });
-    //   res.render('layout/main-layout', {
-    //     errors,
-    //     name,
-    //     phoneNumber,
-    //     personalId,
-    //     date_of_birth,
-    //     gender,
-    //     email,
-    //     username,
-    //     password,
-    //     title: 'Đăng ký | Samurai Sushi',
-    //     description: 'Đăng ký thành viên',
-    //     content: '../pages/account/account.ejs',
-    //     contentPath: '../account/register.ejs'
-    //   });
-    // } else {
-    //   const newUser = {
-    //     username: username,
-    //     password: await bcrypt.hash(password, 10),
-    //     name: name,
-    //     phone_number: phoneNumber,
-    //     personal_id: personalId,
-    //     date_of_birth: date_of_birth,
-    //     gender: gender,
-    //     email: email
-    //   };
-    //   const result = await db.raw(`CALL sp_SignupNewCustomer(?, ?, ?, ?, ?, ?, ?, ?)`, [
-    //     newAccount.username,
-    //     newAccount.password,
-    //     newUser.name,
-    //     newUser.phone_number,
-    //     newUser.email,
-    //     newUser.personal_id,
-    //     newUser.date_of_birth,
-    //     newUser.gender
-    //   ]);
-    //   console.log(result);
-    //   req.flash('success_msg', 'You are now registered and can log in');
-    //   res.redirect('/tai-khoan/dang-nhap');
-    // }
+    } else {
+      const newAccount = {
+        username: username,
+        password: await bcrypt.hash(password, 10),
+        role: 'Khách hàng'
+      };
+      const acc = await db('account').insert(newAccount);
+      console.log(acc);
+      const newUser = {
+        name: name,
+        phone_number: phoneNumber,
+        personal_id: personalId,
+        date_of_birth: date_of_birth,
+        gender: gender,
+        email: email,
+        account_id: acc[0]
+      };
+      await db('customer').insert(newUser);
+      req.flash('success_msg', 'You are now registered and can log in');
+      res.redirect('/tai-khoan/dang-nhap');
+    }
   }
 };
 
