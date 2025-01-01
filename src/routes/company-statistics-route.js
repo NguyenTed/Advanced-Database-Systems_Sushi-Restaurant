@@ -17,7 +17,7 @@ routes.use((req, res, next) => {
   next();
 });
 
-routes.use('/thong-ke/cong-ty', verifyRole(['Quản lí công ty']));
+routes.use('/thong-ke/cong-ty', verifyRole(['Quản lý công ty']));
 routes.get('/thong-ke/cong-ty', renderBranchStatistics);
 routes.get('/thong-ke/cong-ty/doanh-thu', renderBranchRevenue);
 routes.get('/thong-ke/cong-ty/nhan-vien', renderBranchEmployees);

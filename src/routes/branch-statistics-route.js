@@ -8,7 +8,7 @@ routes.use((req, res, next) => {
   next();
 });
 
-routes.use('/thong-ke/chi-nhanh', verifyRole(['Quản lí chi nhánh']));
+routes.use('/thong-ke/chi-nhanh', verifyRole(['Quản lý chi nhánh']));
 routes.get('/thong-ke/chi-nhanh', renderBranchStatistics);
 routes.get('/thong-ke/chi-nhanh/doanh-thu', renderBranchRevenue);
 routes.get('/thong-ke/chi-nhanh/nhan-vien', renderBranchEmployees);
