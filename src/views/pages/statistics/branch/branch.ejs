@@ -3,35 +3,41 @@
     <!-- Branch Info -->
     <div class="max-w-6xl mx-auto mb-6">
       <h2 class="font-semibold mb-2">Chi nhánh của bạn</h2>
-      <div class="w-full p-3 border rounded-lg bg-white">
-        <%= branch.name %>
-      </div>
+      <div class="w-full p-3 border rounded-lg bg-white"><%= branch.name %></div>
     </div>
 
     <!-- Navigation Tabs -->
     <div class="max-w-6xl mx-auto mb-6 flex justify-center space-x-4">
-      <a href="/thong-ke/chi-nhanh/doanh-thu?branchId=<%= selectedBranch %>"
-        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/doanh-thu' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+      <a
+        href="/thong-ke/chi-nhanh/doanh-thu?branchId=<%= selectedBranch %>"
+        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/doanh-thu' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+      >
         Doanh thu
       </a>
-      <a href="/thong-ke/chi-nhanh/nhan-vien?branchId=<%= selectedBranch %>"
-        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/nhan-vien' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+      <a
+        href="/thong-ke/chi-nhanh/nhan-vien?branchId=<%= selectedBranch %>"
+        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/nhan-vien' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+      >
         Nhân viên
       </a>
-      <a href="/thong-ke/chi-nhanh/khach-hang?branchId=<%= selectedBranch %>"
-        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/khach-hang' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+      <a
+        href="/thong-ke/chi-nhanh/khach-hang?branchId=<%= selectedBranch %>"
+        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/khach-hang' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+      >
         Khách hàng
       </a>
-      <a href="/thong-ke/chi-nhanh/hoa-don?branchId=<%= selectedBranch %>"
-        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/hoa-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+      <a
+        href="/thong-ke/chi-nhanh/hoa-don?branchId=<%= selectedBranch %>"
+        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/hoa-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+      >
         Hóa đơn
       </a>
     </div>
 
     <!-- Content Section -->
-    <% if (typeof contentPath !=='undefined' ) { %>
-      <%- include(contentPath) %>
-        <% } %>
+    <% if (typeof contentPath !== 'undefined') { %>
+    <%- include(contentPath) %>
+    <% } %>
   </div>
 </div>
 

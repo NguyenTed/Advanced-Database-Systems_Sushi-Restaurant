@@ -63,71 +63,29 @@ export const renderBranchRevenue = async (req, res) => {
       availableMonths = monthsQuery[0];
     }
 
-    let timeQuery = '';
+    const params = {
+      branchId: branchId,
+      year: year ? year : null,
+      month: month ? month : null
+    };
+
+    let result;
+
     switch (period) {
       case 'month':
-        timeQuery = `
-          SELECT 
-            DATE_FORMAT(i.issue_date, '%Y-%m') as date,
-            SUM(i.total_amount) as revenue
-          FROM invoice i
-          JOIN \`order\` o ON i.order_id = o.order_id
-          WHERE o.branch_id = ?
-          ${year ? 'AND YEAR(i.issue_date) = ?' : ''}
-          GROUP BY DATE_FORMAT(i.issue_date, '%Y-%m')
-          ORDER BY date ASC
-          LIMIT 12`;
+        if (params.year) result = await db.raw(`CALL GetMonthlyRevenueByYear(?, ?)`, [params.branchId, params.year]);
         break;
       case 'quarter':
-        timeQuery = `
-            SELECT 
-              CONCAT(YEAR(i.issue_date), '-Q', QUARTER(i.issue_date)) as date,
-              SUM(i.total_amount) as revenue
-            FROM invoice i
-            JOIN \`order\` o ON i.order_id = o.order_id
-            WHERE o.branch_id = ?
-            ${year ? 'AND YEAR(i.issue_date) = ?' : ''}
-            GROUP BY date
-            ORDER BY date ASC
-            LIMIT 8`;
+        if (params.year) result = await db.raw(`CALL GetQuarterlyRevenueByYear(?, ?)`, [params.branchId, params.year]);
         break;
       case 'year':
-        timeQuery = `
-          SELECT 
-            YEAR(i.issue_date) as date,
-            SUM(i.total_amount) as revenue
-          FROM invoice i
-          JOIN \`order\` o ON i.order_id = o.order_id
-          WHERE o.branch_id = ?
-          GROUP BY YEAR(i.issue_date)
-          ORDER BY date ASC
-          LIMIT ?`; // show 5 recent years
+        result = await db.raw(`CALL GetYearlyRevenue(?)`, [params.branchId]);
         break;
       default: // day
-        timeQuery = `
-          SELECT 
-            DATE(i.issue_date) as date,
-            SUM(i.total_amount) as revenue
-          FROM invoice i
-          JOIN \`order\` o ON i.order_id = o.order_id
-          WHERE o.branch_id = ?
-          ${year && month ? 'AND YEAR(i.issue_date) = ? AND MONTH(i.issue_date) = ?' : ''}
-          GROUP BY DATE(i.issue_date)
-          ORDER BY date ASC
-          LIMIT 30`;
+        result = await db.raw(`CALL GetDailyRevenueByMonthYear(?, ?, ?)`, [params.branchId, params.year, params.month]);
     }
 
-    const params = [branchId];
-    if (period === 'day' && year && month) {
-      params.push(year, month);
-    } else if ((period === 'month' || period === 'quarter') && year) {
-      params.push(year);
-    } else if (period === 'year') {
-      params.push(Number(yearLimit));
-    }
-
-    const query = await db.raw(timeQuery, params);
-    revenueData = query[0];
+    revenueData = result ? result[0][0] : [];
   }
 
   const branch = await db('branch').where('branch_id', branchId).first();
@@ -428,7 +386,7 @@ export const renderBranchInvoices = async (req, res) => {
       content: '../pages/403.ejs'
     });
   }
-  
+
   const perPage = 20;
   let invoices = [];
   let totalInvoices = 0;

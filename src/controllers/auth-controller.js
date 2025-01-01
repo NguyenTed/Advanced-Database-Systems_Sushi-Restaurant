@@ -72,23 +72,46 @@ export const handleSignUp = async (req, res) => {
         contentPath: '../account/register.ejs'
       });
     } else {
-      const newAccount = {
+      // const newAccount = {
+      //   username: username,
+      //   password: await bcrypt.hash(password, 10),
+      //   role: 'Khách hàng'
+      // };
+      // const acc = await db('account').insert(newAccount);
+      // console.log(acc);
+      // const newUser = {
+      //   name: name,
+      //   phone_number: phoneNumber,
+      //   personal_id: personalId,
+      //   date_of_birth: date_of_birth,
+      //   gender: gender,
+      //   email: email,
+      //   account_id: acc[0]
+      // };
+      // await db('customer').insert(newUser);
+      const data = {
         username: username,
         password: await bcrypt.hash(password, 10),
-        role: 'Khách hàng'
-      };
-      const acc = await db('account').insert(newAccount);
-      console.log(acc);
-      const newUser = {
         name: name,
         phone_number: phoneNumber,
+        email: email,
         personal_id: personalId,
         date_of_birth: date_of_birth,
-        gender: gender,
-        email: email,
-        account_id: acc[0]
+        gender: gender
       };
-      await db('customer').insert(newUser);
+      const result = await db.raw(`CALL RegisterCustomer(?, ?, ?, ?, ?, ?, ?, ?)`, [
+        data.username,
+        data.password,
+        data.name,
+        data.phone_number,
+        data.email,
+        data.personal_id,
+        data.date_of_birth,
+        data.gender
+      ]);
+      console.log('debug');
+      console.log(data);
+      console.log(result);
       req.flash('success_msg', 'You are now registered and can log in');
       res.redirect('/tai-khoan/dang-nhap');
     }

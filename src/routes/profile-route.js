@@ -12,14 +12,12 @@ routes.get('/thong-tin-ca-nhan', async (req, res) => {
     membershipInfo = await db('membership_card').where('customer_id', profile.customer_id).first();
   } else {
     // Get employee department and branch names
-    const employeeInfo = await db('employee')
-      .join('department', 'employee.department_id', 'department.department_id')
-      .join('branch', 'employee.branch_id', 'branch.branch_id')
-      .where('employee.employee_id', profile.employee_id)
-      .select('department.name as department_name', 'branch.name as branch_name')
-      .first();
+    const result = await db.raw(`CALL GetEmployeeInfo(${profile.employee_id})`);
+    const employeeInfo = result[0][0][0];
+    console.log(employeeInfo);
 
     profile = { ...profile, ...employeeInfo };
+    console.log(profile);
   }
 
   res.render('layout/main-layout', {

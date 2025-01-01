@@ -6,7 +6,8 @@ import { db } from '../db.js';
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     console.log('Authenticating:', username);
-    const user = await db('account').where('username', username).first();
+    const result = await db.raw(`CALL CustomerLogin(?)`, [username]);
+    const user = result[0][0][0];
     console.log('User:', user);
     if (!user) return done(null, false, { message: 'No user found' });
     let isMatch = await bcrypt.compare(password, user.password);
