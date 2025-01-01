@@ -59,8 +59,8 @@ app.use((req, res, next) => {
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
   res.locals.isAuthenticated = req.isAuthenticated; // Boolean to check login status
-  res.locals.profile = req.profile || null; // Pass profile data to views
-  res.locals.user = req.user || null;
+  res.locals.profile = req.profile || null; // chứa thông tin về customer hoặc employee
+  res.locals.user = req.user || null; // chứa thông tin về account
   next();
 });
 

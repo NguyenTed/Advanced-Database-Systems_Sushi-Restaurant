@@ -6,16 +6,30 @@ const routes = Router();
 
 routes.get('/thong-tin-ca-nhan', async (req, res) => {
   let membershipInfo = null;
+  let profile = req.profile;
+
   if (req.user.role === 'Khách hàng') {
-    membershipInfo = await db('membership_card').where('customer_id', req.profile.customer_id).first();
+    membershipInfo = await db('membership_card')
+      .where('customer_id', profile.customer_id)
+      .first();
+  } else {
+    // Get employee department and branch names
+    const employeeInfo = await db('employee')
+      .join('department', 'employee.department_id', 'department.department_id')
+      .join('branch', 'employee.branch_id', 'branch.branch_id')
+      .where('employee.employee_id', profile.employee_id)
+      .select('department.name as department_name', 'branch.name as branch_name')
+      .first();
+    
+    profile = { ...profile, ...employeeInfo };
   }
 
   res.render('layout/main-layout', {
     title: 'Thông tin cá nhân | Samurai Sushi',
     description: 'Thông tin cá nhân người dùng',
     content: '../pages/profile.ejs',
-    user: req.user,
-    membershipInfo
+    membershipInfo,
+    profile
   });
 });
 

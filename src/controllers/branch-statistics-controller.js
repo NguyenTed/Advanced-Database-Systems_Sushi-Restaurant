@@ -1,19 +1,36 @@
 import { db } from '../config/db.js';
 
+const validateBranchAccess = (requestedBranchId, userBranchId) => {
+  if (!requestedBranchId || requestedBranchId != userBranchId) {
+    return false;
+  }
+  return true;
+};
+
 export const renderBranchStatistics = async (req, res) => {
-  const { branchId } = req.query;
-  const branches = await db('branch');
+  const branchId = req.profile.branch_id;
+
+  const branch = await db('branch').where('branch_id', branchId).first();
   res.render('layout/main-layout', {
     title: 'Thống kê chi nhánh | Samurai Sushi',
     description: 'Thống kê chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
-    branches,
+    branch,
     selectedBranch: branchId
   });
 };
 
 export const renderBranchRevenue = async (req, res) => {
+  const userBranchId = req.profile.branch_id;
   const { branchId, period = 'day', year, month, yearLimit = 5 } = req.query; // Default to 'day'
+  if (!validateBranchAccess(branchId, userBranchId)) {
+    return res.status(403).render('layout/main-layout', {
+      title: '403 - Không có quyền',
+      description: 'Bạn không có quyền truy cập dữ liệu của chi nhánh khác',
+      content: '../pages/403.ejs'
+    });
+  }
+
   let revenueData = [];
   let availableYears = [];
   let availableMonths = [];
@@ -113,13 +130,13 @@ export const renderBranchRevenue = async (req, res) => {
     revenueData = query[0];
   }
 
-  const branches = await db('branch');
+  const branch = await db('branch').where('branch_id', branchId).first();
   res.render('layout/main-layout', {
     title: 'Doanh thu chi nhánh | Samurai Sushi',
     description: 'Thống kê doanh thu chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
     contentPath: '../branch/revenue.ejs',
-    branches,
+    branch,
     selectedBranch: branchId,
     selectedPeriod: period,
     selectedYear: year,
@@ -132,7 +149,15 @@ export const renderBranchRevenue = async (req, res) => {
 };
 
 export const renderBranchEmployees = async (req, res) => {
+  const userBranchId = req.profile.branch_id;
   const { branchId, employeeId, period = 'day', year, month, yearLimit = 5, employmentStatus = 'all', search, page = 1 } = req.query;
+  if (!validateBranchAccess(branchId, userBranchId)) {
+    return res.status(403).render('layout/main-layout', {
+      title: '403 - Không có quyền',
+      description: 'Bạn không có quyền truy cập dữ liệu của chi nhánh khác',
+      content: '../pages/403.ejs'
+    });
+  }
 
   const perPage = 20;
   let employees = [];
@@ -254,8 +279,8 @@ export const renderBranchEmployees = async (req, res) => {
             .orWhere('employee.phone_number', 'like', `%${search}%`)
             .orWhere('employee.address', 'like', `%${search}%`)
             .orWhere('department.name', 'like', `%${search}%`)
-            .orWhere(function() {
-              const salaryNum = parseFloat(search.replace(/[^0-9.-]+/g, ""));
+            .orWhere(function () {
+              const salaryNum = parseFloat(search.replace(/[^0-9.-]+/g, ''));
               if (!isNaN(salaryNum)) {
                 this.where('employee.salary', '=', salaryNum);
               }
@@ -276,13 +301,13 @@ export const renderBranchEmployees = async (req, res) => {
     }
   }
 
-  const branches = await db('branch');
+  const branch = await db('branch').where('branch_id', branchId).first();
   res.render('layout/main-layout', {
     title: 'Nhân viên chi nhánh | Samurai Sushi',
     description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
     contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
-    branches,
+    branch,
     selectedBranch: branchId,
     employmentStatus,
     searchTerm: search,
@@ -304,7 +329,16 @@ export const renderBranchEmployees = async (req, res) => {
 };
 
 export const renderBranchCustomers = async (req, res) => {
+  const userBranchId = req.profile.branch_id;
   const { branchId, search, page = 1, customerId } = req.query;
+  if (!validateBranchAccess(branchId, userBranchId)) {
+    return res.status(403).render('layout/main-layout', {
+      title: '403 - Không có quyền',
+      description: 'Bạn không có quyền truy cập dữ liệu của chi nhánh khác',
+      content: '../pages/403.ejs'
+    });
+  }
+
   const perPage = 20;
   let customers = [];
   let totalCustomers = 0;
@@ -314,14 +348,7 @@ export const renderBranchCustomers = async (req, res) => {
     if (customerId) {
       // Get selected customer with membership card info
       selectedCustomer = await db('customer')
-        .select(
-          'customer.*',
-          'membership_card.card_num',
-          'membership_card.type',
-          'membership_card.points',
-          'membership_card.issue_date',
-          'membership_card.discount_amount'
-        )
+        .select('customer.*', 'membership_card.card_num', 'membership_card.type', 'membership_card.points', 'membership_card.issue_date', 'membership_card.discount_amount')
         .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id')
         .where('customer.customer_id', customerId)
         .first();
@@ -330,7 +357,7 @@ export const renderBranchCustomers = async (req, res) => {
       const applyConditions = (query) => {
         query.where('order.branch_id', branchId);
         if (search) {
-          query.where(function() {
+          query.where(function () {
             const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
             const matches = search.match(dateRegex);
 
@@ -342,7 +369,7 @@ export const renderBranchCustomers = async (req, res) => {
 
             if (matches) {
               const [, day, month, year] = matches;
-              const mysqlDate = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+              const mysqlDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
               this.orWhere('customer.date_of_birth', mysqlDate);
             }
           });
@@ -351,30 +378,18 @@ export const renderBranchCustomers = async (req, res) => {
       };
 
       // Count query
-      const countQuery = db('customer')
-        .join('order', 'customer.customer_id', 'order.customer_id');
+      const countQuery = db('customer').join('order', 'customer.customer_id', 'order.customer_id');
       applyConditions(countQuery);
-      const countResult = await countQuery
-        .countDistinct('customer.customer_id as total')
-        .first();
+      const countResult = await countQuery.countDistinct('customer.customer_id as total').first();
       totalCustomers = countResult.total;
 
       // Data query
       const dataQuery = db('customer')
-        .select(
-          'customer.customer_id',
-          'customer.name',
-          'customer.phone_number',
-          'customer.email',
-          'customer.personal_id',
-          'customer.date_of_birth',
-          'customer.gender',
-          'membership_card.card_num'
-        )
+        .select('customer.customer_id', 'customer.name', 'customer.phone_number', 'customer.email', 'customer.personal_id', 'customer.date_of_birth', 'customer.gender', 'membership_card.card_num')
         .distinct()
         .join('order', 'customer.customer_id', 'order.customer_id')
         .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id');
-      
+
       applyConditions(dataQuery);
       customers = await dataQuery
         .orderBy('customer.customer_id')
@@ -383,13 +398,13 @@ export const renderBranchCustomers = async (req, res) => {
     }
   }
 
-  const branches = await db('branch');
+  const branch = await db('branch').where('branch_id', branchId).first();
   res.render('layout/main-layout', {
     title: 'Khách hàng chi nhánh | Samurai Sushi',
     description: 'Thống kê khách hàng chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
     contentPath: '../branch/customers.ejs',
-    branches,
+    branch,
     selectedBranch: branchId,
     searchTerm: search,
     customers,
@@ -404,24 +419,29 @@ export const renderBranchCustomers = async (req, res) => {
 };
 
 export const renderBranchInvoices = async (req, res) => {
+  const userBranchId = req.profile.branch_id;
   const { branchId, search, page = 1, startDate, endDate } = req.query;
+  if (!validateBranchAccess(branchId, userBranchId)) {
+    return res.status(403).render('layout/main-layout', {
+      title: '403 - Không có quyền',
+      description: 'Bạn không có quyền truy cập dữ liệu của chi nhánh khác',
+      content: '../pages/403.ejs'
+    });
+  }
+  
   const perPage = 20;
   let invoices = [];
   let totalInvoices = 0;
 
   if (branchId) {
     // Base query
-    const baseQuery = db('invoice as i')
-      .join('order as o', 'i.order_id', 'o.order_id')
-      .leftJoin('customer as c', 'i.customer_id', 'c.customer_id')
-      .where('o.branch_id', branchId);
+    const baseQuery = db('invoice as i').join('order as o', 'i.order_id', 'o.order_id').leftJoin('customer as c', 'i.customer_id', 'c.customer_id').where('o.branch_id', branchId);
 
     // Apply search filters if any
     if (search || startDate || endDate) {
-      baseQuery.where(function() {
+      baseQuery.where(function () {
         if (search) {
-          this.where('c.name', 'like', `%${search}%`)
-            .orWhere('i.invoice_id', 'like', `%${search}%`);
+          this.where('c.name', 'like', `%${search}%`).orWhere('i.invoice_id', 'like', `%${search}%`);
         }
         if (startDate) {
           this.where('i.issue_date', '>=', startDate);
@@ -438,29 +458,19 @@ export const renderBranchInvoices = async (req, res) => {
 
     // Get paginated invoices
     invoices = await baseQuery
-      .select(
-        'i.invoice_id',
-        'i.issue_date',
-        'i.total_amount',
-        'i.discount_amount',
-        'i.points_earned',
-        'c.name as customer_name',
-        'c.customer_id',
-        'c.phone_number'
-      )
+      .select('i.invoice_id', 'i.issue_date', 'i.total_amount', 'i.discount_amount', 'i.points_earned', 'c.name as customer_name', 'c.customer_id', 'c.phone_number')
       .orderBy('i.issue_date', 'desc')
       .limit(perPage)
       .offset((page - 1) * perPage);
   }
 
-  const branches = await db('branch');
-
+  const branch = await db('branch').where('branch_id', branchId).first();
   res.render('layout/main-layout', {
     title: 'Hóa đơn chi nhánh | Samurai Sushi',
     description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
     content: '../pages/statistics/branch/branch.ejs',
     contentPath: '../branch/invoices.ejs',
-    branches,
+    branch,
     selectedBranch: branchId,
     searchTerm: search,
     startDate,
