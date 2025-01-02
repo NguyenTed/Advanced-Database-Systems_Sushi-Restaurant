@@ -6,7 +6,7 @@
       <section id="filterSection" class="bg-white p-6 rounded-lg shadow-md mb-12">
         <div class="space-y-4">
           <div>
-            <label for="branch" class="block font-semibold text-gray-700">Chi nhánh</label>
+            <label for="branch" class="block font-semibold text-orange-600">Chi nhánh</label>
             <select name="branch" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
               <option value="" <% if (!selectedBranch) { %>selected<% } %>>Tất cả</option>
               <% allBranches.forEach(branch => { %>
@@ -16,7 +16,7 @@
             </select>
           </div>
           <div>
-            <label for="category" class="block font-semibold text-gray-700">Loại Món</label>
+            <label for="category" class="block font-semibold text-orange-600">Loại Món</label>
             <select name="category" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
               <option value="" <% if (!selectedCategory) { %>selected<% } %>>Tất cả</option>
               <% allCategories.forEach(category=> { %>
@@ -32,15 +32,14 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <% dishes.forEach(dish=> { %>
           <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <img src="<%- dish.img_url %>" alt="Dish 1"
-              class="w-full h-48 object-cover" />
+            <img src="<%- dish.img_url %>" alt="Dish 1" class="w-full h-48 object-cover" />
             <div class="p-4">
               <h3 class="text-lg font-bold text-gray-800"><%- dish.name %></h3>
               <p class="text-gray-600 mt-2 text-sm"><%- dish.description %></p>
               <span class="block text-red-500 mt-4 font-bold"><%- dish.price %> VNĐ</span>
             </div>
           </div>
-          <% }) %>
+        <% }) %>
       </div>
     </section>
   </form>
