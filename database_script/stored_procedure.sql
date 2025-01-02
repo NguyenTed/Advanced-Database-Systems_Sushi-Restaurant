@@ -1,3 +1,4 @@
+use sushi_restaurant;
 DROP PROCEDURE IF EXISTS CustomerLogin;
 DROP PROCEDURE IF EXISTS RegisterCustomer;
 DROP PROCEDURE IF EXISTS GetDishes;
@@ -374,52 +375,52 @@ CREATE PROCEDURE TransferEmployee(
     IN p_transfer_date DATE
 )
 BEGIN
-    -- Declare variables to store current branch and department
     DECLARE v_current_branch_id INT;
     DECLARE v_current_department_id INT;
-
-    -- Fetch current branch and department
+    DECLARE v_basic_salary DECIMAL(10,2);
+    
+    -- Get current assignment from work history first
     SELECT branch_id, department_id
     INTO v_current_branch_id, v_current_department_id
-    FROM EMPLOYEE
-    WHERE employee_id = p_employee_id;
+    FROM EMPLOYEE_WORK_HISTORY
+    WHERE employee_id = p_employee_id
+    AND end_date IS NULL;
+    
+    -- Get basic salary for new department
+    SELECT basic_salary 
+    INTO v_basic_salary
+    FROM DEPARTMENT 
+    WHERE department_id = p_new_department_id;
 
-    -- Check if the employee already belongs to the new branch and department
+    -- Validate transfer
     IF v_current_branch_id = p_new_branch_id AND v_current_department_id = p_new_department_id THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Employee is already in the specified branch and department.';
     END IF;
 
-    -- Update the current record in EMPLOYEE_WORK_HISTORY to set the end_date
+    -- Update old work history first
     UPDATE EMPLOYEE_WORK_HISTORY
     SET end_date = p_transfer_date
     WHERE employee_id = p_employee_id
-      AND branch_id = v_current_branch_id
-      AND department_id = v_current_department_id
-      AND end_date IS NULL;
+    AND branch_id = v_current_branch_id
+    AND department_id = v_current_department_id
+    AND end_date IS NULL;
 
-    -- Update the EMPLOYEE table with the new branch and department
+    -- Then update employee
     UPDATE EMPLOYEE
     SET 
         branch_id = p_new_branch_id,
-        department_id = p_new_department_id
+        department_id = p_new_department_id,
+        salary = v_basic_salary
     WHERE 
         employee_id = p_employee_id;
 
-    -- Insert a new record into EMPLOYEE_WORK_HISTORY for the new assignment
+    -- Finally insert new work history
     INSERT INTO EMPLOYEE_WORK_HISTORY (
-        employee_id,
-        branch_id,
-        department_id,
-        start_date,
-        end_date
+        employee_id, branch_id, department_id, start_date, end_date
     )
     VALUES (
-        p_employee_id,
-        p_new_branch_id,
-        p_new_department_id,
-        p_transfer_date,
-        NULL
+        p_employee_id, p_new_branch_id, p_new_department_id, p_transfer_date, NULL
     );
 END$$
 DELIMITER ;
@@ -427,29 +428,41 @@ DELIMITER ;
 -- Quản lý: Xem thống kê món ăn
 DELIMITER $$
 CREATE PROCEDURE GetMostOrderedDishesInRange(
-	IN in_branch_id INT,
-	IN startDate DATE,
-    IN endDate DATE
+    IN p_branch_id INT,
+    IN p_start_date DATE,
+    IN p_end_date DATE,
+    IN p_sort_by VARCHAR(10),
+    IN p_sort_order VARCHAR(4)
 )
 BEGIN
-    SELECT 
-        d.dish_id,
-        d.name AS dish_name,
-        d.price,
-        IFNULL(SUM(od.quantity), 0) AS total_quantity_ordered
-    FROM 
-        DISH d
-    LEFT JOIN 
-        ORDER_DETAIL od ON d.dish_id = od.dish_id
-    LEFT JOIN 
-        `ORDER` o ON od.order_id = o.order_id
-    WHERE 
-        (o.branch_id = in_branch_id OR in_branch_id IS NULL)
-        AND (o.creation_date BETWEEN startDate AND endDate OR o.creation_date IS NULL)
-    GROUP BY 
-        d.dish_id, d.name, d.price
-    ORDER BY 
-        total_quantity_ordered DESC;
+    SET @branch_id = p_branch_id;
+    SET @start_date = p_start_date;
+    SET @end_date = p_end_date;
+    
+    SET @sort_query = CONCAT('
+        SELECT 
+            d.name,
+            IFNULL(SUM(od.quantity), 0) AS quantity,
+            IFNULL(SUM(od.quantity * d.price), 0) AS revenue
+        FROM 
+            DISH d
+        LEFT JOIN 
+            ORDER_DETAIL od ON d.dish_id = od.dish_id
+        LEFT JOIN 
+            `ORDER` o ON od.order_id = o.order_id AND o.status = "Completed"
+        WHERE 
+            (@branch_id IS NULL OR o.branch_id = @branch_id)
+            AND (@start_date IS NULL OR o.creation_date >= @start_date)
+            AND (@end_date IS NULL OR o.creation_date <= @end_date)
+        GROUP BY 
+            d.dish_id, d.name
+        ORDER BY ', 
+        p_sort_by, ' ', p_sort_order
+    );
+    
+    PREPARE stmt FROM @sort_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
 END$$
 DELIMITER ;
 

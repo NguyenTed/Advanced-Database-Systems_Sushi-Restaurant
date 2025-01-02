@@ -323,7 +323,6 @@ export const postEditEmployee = async (req, res) => {
   try {
     if (type === 'personal') {
       const { name, address, phone_number } = req.body;
-
       await db('EMPLOYEE').where('employee_id', employee_id).update({
         name,
         address,
@@ -332,51 +331,27 @@ export const postEditEmployee = async (req, res) => {
     } else if (type === 'transfer') {
       const { department, branch } = req.body;
 
-      // Get department_id and basic_salary from department name
-      const departmentRecord = await db('DEPARTMENT').where('name', department).select('department_id', 'basic_salary').first();
+      // Get department_id from department name
+      const departmentRecord = await db('DEPARTMENT').where('name', department).select('department_id').first();
 
       if (!departmentRecord) {
         return res.status(400).send('Invalid department');
       }
 
-      // Check if there's an existing active work history
-      const currentWorkHistory = await db('EMPLOYEE_WORK_HISTORY')
-        .where({
-          employee_id,
-          end_date: null
-        })
-        .first();
-
-      // If there is an active work history, update its end date
-      if (currentWorkHistory) {
-        await db('EMPLOYEE_WORK_HISTORY')
-          .where({
-            employee_id,
-            end_date: null
-          })
-          .update({
-            end_date: new Date()
-          });
-      }
-
-      // Create new work history record
-      await db('EMPLOYEE_WORK_HISTORY').insert({
+      // Call TransferEmployee stored procedure
+      await db.raw('CALL TransferEmployee(?, ?, ?, ?)', [
         employee_id,
-        branch_id: branch,
-        department_id: departmentRecord.department_id,
-        start_date: new Date()
-      });
-
-      // Update employee record
-      await db('EMPLOYEE').where('employee_id', employee_id).update({
-        department_id: departmentRecord.department_id,
-        branch_id: branch,
-        salary: departmentRecord.basic_salary
-      });
+        branch,
+        departmentRecord.department_id,
+        new Date().toISOString().split('T')[0] // Current date in YYYY-MM-DD
+      ]);
     }
 
     res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
   } catch (error) {
+    if (error.message.includes('Employee is already in the specified branch and department')) {
+      return res.status(400).send('Nhân viên đã thuộc chi nhánh và bộ phận này');
+    }
     console.error(error);
     res.status(500).send('Server Error');
   }
@@ -548,26 +523,9 @@ export const renderBranchDishes = async (req, res) => {
   let totalRevenue = 0;
 
   if (branchId) {
-    // Base query with safe sort parameters
-    const baseQuery = db.raw(
-      `SELECT 
-          d.name,
-          IFNULL(SUM(od.quantity), 0) AS quantity,
-          IFNULL(SUM(od.quantity * d.price), 0) AS revenue
-         FROM dish d
-         LEFT JOIN order_detail od ON d.dish_id = od.dish_id
-         LEFT JOIN \`order\` o ON od.order_id = o.order_id
-         WHERE o.branch_id = ?
-         AND o.status = 'Completed'
-         ${startDate ? 'AND o.creation_date >= ?' : ''}
-         ${endDate ? 'AND o.creation_date <= ?' : ''}
-         GROUP BY d.dish_id, d.name
-         ORDER BY ${sortBy} ${sortOrder}`,
-      [branchId, ...(startDate ? [startDate] : []), ...(endDate ? [endDate] : [])]
-    );
-
-    const query = await baseQuery;
-    dishesData = query[0];
+    // Call stored procedure
+    const query = await db.raw('CALL GetMostOrderedDishesInRange(?, ?, ?, ?, ?)', [branchId, startDate || null, endDate || null, sortBy, sortOrder]);
+    dishesData = query[0][0]; // First element of first row set
 
     // Sort by quantity for best/worst selling
     const sortedByQuantity = [...dishesData].sort((a, b) => b.quantity - a.quantity);

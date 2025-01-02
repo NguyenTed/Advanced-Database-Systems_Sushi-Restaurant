@@ -85,7 +85,7 @@
                             <th class="text-left py-3 w-16">STT</th>
                             <th class="text-left py-3">Tên món</th>
                             <th class="text-right py-3">
-                                <a href="?branchId=<%= selectedBranch %>&sortBy=quantity&sortOrder=<%= sortBy === 'quantity' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                                <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&sortBy=quantity&sortOrder=<%= sortBy === 'quantity' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
                                     class="flex items-center justify-end space-x-1 hover:text-red-600">
                                     <span>Số lượng đã bán</span>
                                     <% if (sortBy==='quantity' ) { %>
@@ -97,7 +97,7 @@
                                 </a>
                             </th>
                             <th class="text-right py-3">
-                                <a href="?branchId=<%= selectedBranch %>&sortBy=revenue&sortOrder=<%= sortBy === 'revenue' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                                <a href="?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&sortBy=revenue&sortOrder=<%= sortBy === 'revenue' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
                                     class="flex items-center justify-end space-x-1 hover:text-red-600">
                                     <span>Doanh thu</span>
                                     <% if (sortBy==='revenue' ) { %>
