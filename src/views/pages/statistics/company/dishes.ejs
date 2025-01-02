@@ -1,0 +1,184 @@
+<div class="max-w-6xl mx-auto">
+    <% if (selectedBranch) { %>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <!-- Search Section -->
+            <div class="flex justify-center space-y-4">
+                <form class="w-full space-y-4" onsubmit="handleSearch(event)">
+                    <div class="flex justify-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <label class="text-gray-600">Từ ngày:</label>
+                            <input type="date" id="startDate" value="<%= startDate || '' %>"
+                                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-gray-600">Đến ngày:</label>
+                            <input type="date" id="endDate" value="<%= endDate || '' %>"
+                                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <button type="submit"
+                            class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 hover:scale-105 transition-all">
+                            Lọc
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <% if (dishesData && dishesData.length> 0) { %>
+            <!-- Best/Worst Selling Items -->
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <!-- Best Selling -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Món bán chạy nhất</h3>
+                    <div class="space-y-4">
+                        <% bestSelling.forEach((dish, index)=> { %>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <span class="font-bold text-2xl text-red-600">#<%= index + 1 %></span>
+                                    <span class="ml-4 font-medium">
+                                        <%= dish.name %>
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-medium text-gray-600">Số lượng: <%= dish.quantity %>
+                                    </div>
+                                    <div class="text-sm text-gray-500">Doanh thu: <%= new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency' , currency: 'VND' }).format(dish.revenue) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+
+                <!-- Worst Selling -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Món bán chậm nhất</h3>
+                    <div class="space-y-4">
+                        <% worstSelling.forEach((dish, index)=> { %>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <span class="font-bold text-2xl text-gray-400">#<%= index + 1 %></span>
+                                    <span class="ml-4 font-medium">
+                                        <%= dish.name %>
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-medium text-gray-600">Số lượng: <%= dish.quantity %>
+                                    </div>
+                                    <div class="text-sm text-gray-500">Doanh thu: <%= new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency' , currency: 'VND' }).format(dish.revenue) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Dishes Table -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-3 w-16">STT</th>
+                            <th class="text-left py-3">Tên món</th>
+                            <th class="text-right py-3">
+                                <a href="?branchId=<%= selectedBranch %>&sortBy=quantity&sortOrder=<%= sortBy === 'quantity' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                                    class="flex items-center justify-end space-x-1 hover:text-red-600">
+                                    <span>Số lượng đã bán</span>
+                                    <% if (sortBy==='quantity' ) { %>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="<%= sortOrder === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7' %>" />
+                                        </svg>
+                                        <% } %>
+                                </a>
+                            </th>
+                            <th class="text-right py-3">
+                                <a href="?branchId=<%= selectedBranch %>&sortBy=revenue&sortOrder=<%= sortBy === 'revenue' && sortOrder === 'desc' ? 'asc' : 'desc' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>"
+                                    class="flex items-center justify-end space-x-1 hover:text-red-600">
+                                    <span>Doanh thu</span>
+                                    <% if (sortBy==='revenue' ) { %>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="<%= sortOrder === 'desc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7' %>" />
+                                        </svg>
+                                        <% } %>
+                                </a>
+                            </th>
+                            <th class="text-right py-3">% Tổng doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% dishesData.forEach((dish, index)=> { %>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 font-bold">
+                                    <%= index + 1 %>
+                                </td>
+                                <td class="py-3">
+                                    <%= dish.name %>
+                                </td>
+                                <td class="text-right">
+                                    <%= dish.quantity %>
+                                </td>
+                                <td class="text-right">
+                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                        }).format(dish.revenue) %>
+                                </td>
+                                <td class="text-right">
+                                    <%= ((dish.revenue / totalRevenue) * 100).toFixed(2) %>%
+                                </td>
+                            </tr>
+                            <% }); %>
+
+                                <!-- Total Row -->
+                                <tr class="border-t-2 border-gray-200 font-bold">
+                                    <td colspan="2" class="py-3">Tổng cộng</td>
+                                    <td class="text-right">
+                                        <%= dishesData.reduce((sum, dish)=> sum + Number(dish.quantity), 0) %>
+                                    </td>
+                                    <td class="text-right">
+                                        <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                            }).format(totalRevenue) %>
+                                    </td>
+                                    <td class="text-right">100%</td>
+                                </tr>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+                    Không có dữ liệu món ăn cho giai đoạn này
+                </div>
+                <% } %>
+                    <% } else { %>
+                        <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-600">
+                            Vui lòng chọn chi nhánh để xem thống kê món ăn
+                        </div>
+                        <% } %>
+</div>
+
+<script>
+    function handleSearch(event) {
+        event.preventDefault();
+        const startDate=document.getElementById('startDate').value;
+        const endDate=document.getElementById('endDate').value;
+
+        const url=new URL(window.location.href);
+        if (startDate) {
+            url.searchParams.set('startDate', startDate);
+        } else {
+            url.searchParams.delete('startDate');
+        }
+
+        if (endDate) {
+            url.searchParams.set('endDate', endDate);
+        } else {
+            url.searchParams.delete('endDate');
+        }
+
+        window.location.href=url.toString();
+    }
+</script>

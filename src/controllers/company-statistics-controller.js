@@ -28,7 +28,8 @@ export const renderBranchRevenue = async (req, res) => {
   let availableMonths = [];
 
   // Get available years for either company or branch view
-  const yearsQuery = await db.raw(`
+  const yearsQuery = await db.raw(
+    `
     SELECT DISTINCT YEAR(i.issue_date) as year
     FROM invoice i
     JOIN \`order\` o ON i.order_id = o.order_id
@@ -40,7 +41,8 @@ export const renderBranchRevenue = async (req, res) => {
 
   // Get available months if year is selected
   if (year) {
-    const monthsQuery = await db.raw(`
+    const monthsQuery = await db.raw(
+      `
       SELECT DISTINCT MONTH(i.issue_date) as month
       FROM invoice i
       JOIN \`order\` o ON i.order_id = o.order_id
@@ -318,6 +320,113 @@ export const renderBranchEmployees = async (req, res) => {
   });
 };
 
+export const getEditEmployee = async (req, res) => {
+  const { branchId, employeeId, areaId } = req.query;
+  const areas = await getAreasData();
+
+  if (!employeeId) {
+    return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
+  }
+
+  try {
+    const employee = await db('EMPLOYEE')
+      .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
+      .where('EMPLOYEE.employee_id', employeeId)
+      .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
+      .first();
+
+    if (!employee) {
+      return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
+    }
+
+    const departments = await db('DEPARTMENT').select('name');
+    const branches = await db('branch'); // Need branches for company layout
+
+    res.render('layout/main-layout', {
+      title: 'Chỉnh sửa nhân viên | Samurai Sushi',
+      description: 'Chỉnh sửa thông tin nhân viên',
+      content: '../pages/statistics/company/company.ejs',
+      contentPath: '../company/edit-employee.ejs',
+      path: '/thong-ke/cong-ty/nhan-vien',
+      areas,
+      selectedArea: areaId,
+      branches,
+      selectedBranch: branchId,
+      employee,
+      departments
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
+export const postEditEmployee = async (req, res) => {
+  const { employee_id } = req.body;
+  const { areaId, branchId, type } = req.query;
+
+  try {
+    if (type === 'personal') {
+      const { name, address, phone_number } = req.body;
+
+      await db('EMPLOYEE').where('employee_id', employee_id).update({
+        name,
+        address,
+        phone_number
+      });
+    } else if (type === 'transfer') {
+      const { department, branch } = req.body;
+
+      // Get department_id and basic_salary from department name
+      const departmentRecord = await db('DEPARTMENT').where('name', department).select('department_id', 'basic_salary').first();
+
+      if (!departmentRecord) {
+        return res.status(400).send('Invalid department');
+      }
+
+      // Check if there's an existing active work history
+      const currentWorkHistory = await db('EMPLOYEE_WORK_HISTORY')
+        .where({
+          employee_id,
+          end_date: null
+        })
+        .first();
+
+      // If there is an active work history, update its end date
+      if (currentWorkHistory) {
+        await db('EMPLOYEE_WORK_HISTORY')
+          .where({
+            employee_id,
+            end_date: null
+          })
+          .update({
+            end_date: new Date()
+          });
+      }
+
+      // Create new work history record
+      await db('EMPLOYEE_WORK_HISTORY').insert({
+        employee_id,
+        branch_id: branch,
+        department_id: departmentRecord.department_id,
+        start_date: new Date()
+      });
+
+      // Update employee record
+      await db('EMPLOYEE').where('employee_id', employee_id).update({
+        department_id: departmentRecord.department_id,
+        branch_id: branch,
+        salary: departmentRecord.basic_salary
+      });
+    }
+
+    res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error');
+  }
+};
+
 export const renderBranchCustomers = async (req, res) => {
   const { branchId, search, page = 1, customerId, areaId } = req.query;
   const perPage = 20;
@@ -465,109 +574,70 @@ export const renderBranchInvoices = async (req, res) => {
   });
 };
 
-export const getEditEmployee = async (req, res) => {
-  const { branchId, employeeId, areaId } = req.query;
+export const renderBranchDishes = async (req, res) => {
+  const { branchId, startDate, endDate, areaId } = req.query;
+  let { sortBy = 'quantity', sortOrder = 'desc' } = req.query;
   const areas = await getAreasData();
+  const branches = await db('branch');
 
-  if (!employeeId) {
-    return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
+  // Validate sort parameters
+  const validSortColumns = ['quantity', 'revenue'];
+  const validSortOrders = ['asc', 'desc'];
+
+  if (!validSortColumns.includes(sortBy)) sortBy = 'quantity';
+  if (!validSortOrders.includes(sortOrder)) sortOrder = 'desc';
+
+  let dishesData = [];
+  let bestSelling = [];
+  let worstSelling = [];
+  let totalRevenue = 0;
+
+  if (branchId) {
+    // Base query with safe sort parameters
+    const baseQuery = db.raw(
+      `SELECT 
+          d.name,
+          IFNULL(SUM(od.quantity), 0) AS quantity,
+          IFNULL(SUM(od.quantity * d.price), 0) AS revenue
+         FROM dish d
+         LEFT JOIN order_detail od ON d.dish_id = od.dish_id
+         LEFT JOIN \`order\` o ON od.order_id = o.order_id
+         WHERE o.branch_id = ?
+         AND o.status = 'Completed'
+         ${startDate ? 'AND o.creation_date >= ?' : ''}
+         ${endDate ? 'AND o.creation_date <= ?' : ''}
+         GROUP BY d.dish_id, d.name
+         ORDER BY ${sortBy} ${sortOrder}`,
+      [branchId, ...(startDate ? [startDate] : []), ...(endDate ? [endDate] : [])]
+    );
+
+    const query = await baseQuery;
+    dishesData = query[0];
+
+    // Sort by quantity for best/worst selling
+    const sortedByQuantity = [...dishesData].sort((a, b) => b.quantity - a.quantity);
+    bestSelling = sortedByQuantity.slice(0, 5);
+    worstSelling = sortedByQuantity.slice(-5).reverse();
+
+    totalRevenue = dishesData.reduce((sum, dish) => sum + Number(dish.revenue), 0);
   }
 
-  try {
-    const employee = await db('EMPLOYEE')
-      .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
-      .where('EMPLOYEE.employee_id', employeeId)
-      .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
-      .first();
-
-    if (!employee) {
-      return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
-    }
-
-    const departments = await db('DEPARTMENT').select('name');
-    const branches = await db('branch'); // Need branches for company layout
-
-    res.render('layout/main-layout', {
-      title: 'Chỉnh sửa nhân viên | Samurai Sushi',
-      description: 'Chỉnh sửa thông tin nhân viên',
-      content: '../pages/statistics/company/company.ejs',
-      contentPath: '../company/edit-employee.ejs',
-      path: '/thong-ke/cong-ty/nhan-vien',
-      areas,
-      selectedArea: areaId,
-      branches,
-      selectedBranch: branchId,
-      employee,
-      departments
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
-  }
-};
-
-export const postEditEmployee = async (req, res) => {
-  const { employee_id } = req.body;
-  const { areaId, branchId, type } = req.query;
-
-  try {
-    if (type === 'personal') {
-      const { name, address, phone_number } = req.body;
-
-      await db('EMPLOYEE').where('employee_id', employee_id).update({
-        name,
-        address,
-        phone_number
-      });
-    } else if (type === 'transfer') {
-      const { department, branch } = req.body;
-
-      // Get department_id and basic_salary from department name
-      const departmentRecord = await db('DEPARTMENT').where('name', department).select('department_id', 'basic_salary').first();
-
-      if (!departmentRecord) {
-        return res.status(400).send('Invalid department');
-      }
-
-      // Check if there's an existing active work history
-      const currentWorkHistory = await db('EMPLOYEE_WORK_HISTORY')
-        .where({
-          employee_id,
-          end_date: null
-        })
-        .first();
-
-      // If there is an active work history, update its end date
-      if (currentWorkHistory) {
-        await db('EMPLOYEE_WORK_HISTORY')
-          .where({
-            employee_id,
-            end_date: null
-          })
-          .update({
-            end_date: new Date()
-          });
-      }
-
-      // Create new work history record
-      await db('EMPLOYEE_WORK_HISTORY').insert({
-        employee_id,
-        branch_id: branch,
-        department_id: departmentRecord.department_id,
-        start_date: new Date()
-      });
-
-      // Update employee record
-      await db('EMPLOYEE').where('employee_id', employee_id).update({
-        department_id: departmentRecord.department_id,
-        branch_id: branch,
-        salary: departmentRecord.basic_salary
-      });
-    }
-
-    res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
-  }
+  res.render('layout/main-layout', {
+    title: 'Thống kê món ăn | Samurai Sushi',
+    description: 'Thống kê món ăn chi nhánh Samurai Sushi',
+    content: '../pages/statistics/company/company.ejs',
+    contentPath: '../company/dishes.ejs',
+    areas,
+    branches,
+    selectedArea: areaId,
+    selectedBranch: branchId,
+    dishesData,
+    bestSelling,
+    worstSelling,
+    totalRevenue,
+    startDate,
+    endDate,
+    sortBy,
+    sortOrder
+  });
 };

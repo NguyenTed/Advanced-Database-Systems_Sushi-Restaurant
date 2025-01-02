@@ -428,7 +428,7 @@ export const renderBranchInvoices = async (req, res) => {
       content: '../pages/403.ejs'
     });
   }
-  
+
   const perPage = 20;
   let invoices = [];
   let totalInvoices = 0;
@@ -483,4 +483,81 @@ export const renderBranchInvoices = async (req, res) => {
       totalPages: Math.ceil(totalInvoices / perPage)
     }
   });
+};
+
+export const renderBranchDishes = async (req, res) => {
+  const userBranchId = req.profile.branch_id;
+  const { branchId, startDate, endDate } = req.query;
+
+  // Validate branch access
+  if (!validateBranchAccess(branchId, userBranchId)) {
+    return res.status(403).render('layout/main-layout', {
+      title: '403 - Không có quyền',
+      description: 'Bạn không có quyền truy cập dữ liệu của chi nhánh khác',
+      content: '../pages/403.ejs'
+    });
+  }
+  let { sortBy = 'quantity', sortOrder = 'desc' } = req.query;
+
+  // Validate sort parameters
+  const validSortColumns = ['quantity', 'revenue'];
+  const validSortOrders = ['asc', 'desc'];
+
+  if (!validSortColumns.includes(sortBy)) sortBy = 'quantity';
+  if (!validSortOrders.includes(sortOrder)) sortOrder = 'desc';
+
+  try {
+    let dishesData = [];
+
+    if (branchId) {
+      // Base query with safe sort parameters
+      const baseQuery = db.raw(
+        `SELECT 
+          d.name,
+          IFNULL(SUM(od.quantity), 0) AS quantity,
+          IFNULL(SUM(od.quantity * d.price), 0) AS revenue
+         FROM dish d
+         LEFT JOIN order_detail od ON d.dish_id = od.dish_id
+         LEFT JOIN \`order\` o ON od.order_id = o.order_id
+         WHERE o.branch_id = ?
+         AND o.status = 'Completed'
+         ${startDate ? 'AND o.creation_date >= ?' : ''}
+         ${endDate ? 'AND o.creation_date <= ?' : ''}
+         GROUP BY d.dish_id, d.name
+         ORDER BY ${sortBy} ${sortOrder}`,
+        [branchId, ...(startDate ? [startDate] : []), ...(endDate ? [endDate] : [])]
+      );
+
+      const query = await baseQuery;
+      dishesData = query[0];
+
+      // Sort by quantity for best/worst selling
+      const sortedByQuantity = [...dishesData].sort((a, b) => b.quantity - a.quantity);
+      const bestSelling = sortedByQuantity.slice(0, 5);
+      const worstSelling = sortedByQuantity.slice(-5).reverse();
+
+      const totalRevenue = dishesData.reduce((sum, dish) => sum + Number(dish.revenue), 0);
+
+      const branch = await db('branch').where('branch_id', branchId).first();
+      res.render('layout/main-layout', {
+        title: 'Thống kê món ăn | Samurai Sushi',
+        description: 'Thống kê món ăn chi nhánh Samurai Sushi',
+        content: '../pages/statistics/branch/branch.ejs',
+        contentPath: '../branch/dishes.ejs',
+        branch,
+        selectedBranch: branchId,
+        dishesData,
+        bestSelling,
+        worstSelling,
+        totalRevenue,
+        startDate,
+        endDate,
+        sortBy,
+        sortOrder
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching dish statistics:', error);
+    res.status(500).send('Error loading dish statistics');
+  }
 };
