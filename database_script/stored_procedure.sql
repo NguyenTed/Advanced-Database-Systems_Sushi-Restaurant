@@ -212,7 +212,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL ReserveAndOrderWeb(1, 5, 4, '2025-01-02 06:18:00', [{"dish_id": 1,"quantity": 3},{"dish_id": 2,"quantity": 3},{"dish_id": 11,"quantity": 1}])
 
 -- Khách hàng: đặt đơn mang đi qua web
 DELIMITER $$
