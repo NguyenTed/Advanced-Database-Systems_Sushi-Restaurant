@@ -1,12 +1,12 @@
 import { db } from '../config/db.js';
 
 export const renderMenuPage = async (req, res) => {
-  const { category, branch } = req.query;
+  const { category, branch, searchValue } = req.query;
   let selectedCategory = category ? await db('category').where('category_id', category).first() : null;
   let selectedBranch = branch ? await db('branch').where('branch_id', branch).first() : null;
 
   const data = {
-    searchKeyword: null,
+    searchKeyword: searchValue,
     category: category ? category : null,
     area: null,
     branch: branch ? branch : null
@@ -21,6 +21,7 @@ export const renderMenuPage = async (req, res) => {
     title: 'Thực đơn | Samurai Sushi',
     description: 'Thực đơn món ăn tại Samurai Sushi',
     dishes: dishes[0][0],
+    searchValue,
     allBranches,
     allCategories,
     selectedCategory,
