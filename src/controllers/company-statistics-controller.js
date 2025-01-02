@@ -333,58 +333,45 @@ export const renderBranchInvoices = async (req, res) => {
   let totalInvoices = 0;
 
   if (branchId) {
-    // Base query
-    const baseQuery = db('invoice as i').join('order as o', 'i.order_id', 'o.order_id').leftJoin('customer as c', 'i.customer_id', 'c.customer_id').where('o.branch_id', branchId);
+    // Call stored procedure
+    const result = await db.raw('CALL SearchInvoicesByCriteria(?, ?, ?, ?, ?, ?)', [branchId, search || null, startDate || null, endDate || null, Number(page), perPage]);
 
-    // Apply search filters if any
-    if (search || startDate || endDate) {
-      baseQuery.where(function () {
-        if (search) {
-          this.where('c.name', 'like', `%${search}%`).orWhere('i.invoice_id', 'like', `%${search}%`);
-        }
-        if (startDate) {
-          this.where('i.issue_date', '>=', startDate);
-        }
-        if (endDate) {
-          this.where('i.issue_date', '<=', endDate);
-        }
-      });
-    }
+    // First result set contains total count
+    totalInvoices = result[0][0][0].total;
+    // Second result set contains paginated invoices
+    invoices = result[0][1];
 
-    // Count total invoices
-    const countResult = await baseQuery.clone().count('i.invoice_id as total').first();
-    totalInvoices = countResult.total;
+    const branches = await db('branch');
 
-    // Get paginated invoices
-    invoices = await baseQuery
-      .select('i.invoice_id', 'i.issue_date', 'i.total_amount', 'i.discount_amount', 'i.points_earned', 'c.name as customer_name', 'c.customer_id', 'c.phone_number')
-      .orderBy('i.issue_date', 'desc')
-      .limit(perPage)
-      .offset((page - 1) * perPage);
+    res.render('layout/main-layout', {
+      title: 'Hóa đơn chi nhánh | Samurai Sushi',
+      description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
+      content: '../pages/statistics/company/company.ejs',
+      contentPath: '../company/invoices.ejs',
+      areas,
+      branches,
+      selectedArea: areaId,
+      selectedBranch: branchId,
+      searchTerm: search,
+      startDate,
+      endDate,
+      invoices,
+      pagination: {
+        currentPage: Number(page),
+        perPage,
+        totalItems: totalInvoices,
+        totalPages: Math.ceil(totalInvoices / perPage)
+      }
+    });
+  } else {
+    res.render('layout/main-layout', {
+      title: 'Hóa đơn chi nhánh | Samurai Sushi',
+      description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
+      content: '../pages/statistics/company/company.ejs',
+      contentPath: '../company/invoices.ejs',
+      selectedBranch: null
+    });
   }
-
-  const branches = await db('branch');
-
-  res.render('layout/main-layout', {
-    title: 'Hóa đơn chi nhánh | Samurai Sushi',
-    description: 'Thống kê hóa đơn chi nhánh Samurai Sushi',
-    content: '../pages/statistics/company/company.ejs',
-    contentPath: '../company/invoices.ejs',
-    areas,
-    branches,
-    selectedArea: areaId,
-    selectedBranch: branchId,
-    searchTerm: search,
-    startDate,
-    endDate,
-    invoices,
-    pagination: {
-      currentPage: Number(page),
-      perPage,
-      totalItems: totalInvoices,
-      totalPages: Math.ceil(totalInvoices / perPage)
-    }
-  });
 };
 
 export const renderBranchDishes = async (req, res) => {
