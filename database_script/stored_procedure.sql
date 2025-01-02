@@ -212,6 +212,7 @@ BEGIN
 END$$
 DELIMITER ;
 
+CALL ReserveAndOrderWeb(1, 5, 4, '2025-01-02 06:18:00', [{"dish_id": 1,"quantity": 3},{"dish_id": 2,"quantity": 3},{"dish_id": 11,"quantity": 1}])
 
 -- Khách hàng: đặt đơn mang đi qua web
 DELIMITER $$
@@ -313,9 +314,6 @@ BEGIN
     ORDER BY date;
 END$$
 DELIMITER ;
-
-call GetDailyRevenueByMonthYear(5, 2024, 5);
-call GetMonthlyRevenueByYear(5, 2024);
 
 -- Nhân viên: Xem thông tin cá nhân
 DELIMITER $$
@@ -438,16 +436,16 @@ BEGIN
         d.dish_id,
         d.name AS dish_name,
         d.price,
-        SUM(od.quantity) AS total_quantity_ordered
+        IFNULL(SUM(od.quantity), 0) AS total_quantity_ordered
     FROM 
-        ORDER_DETAIL od
-    JOIN 
-        DISH d ON od.dish_id = d.dish_id
-	JOIN 
+        DISH d
+    LEFT JOIN 
+        ORDER_DETAIL od ON d.dish_id = od.dish_id
+    LEFT JOIN 
         `ORDER` o ON od.order_id = o.order_id
     WHERE 
-		(o.branch_id = branch_id OR branch_id IS NULL)
-        AND o.creation_date BETWEEN startDate AND endDate
+        (o.branch_id = in_branch_id OR in_branch_id IS NULL)
+        AND (o.creation_date BETWEEN startDate AND endDate OR o.creation_date IS NULL)
     GROUP BY 
         d.dish_id, d.name, d.price
     ORDER BY 
