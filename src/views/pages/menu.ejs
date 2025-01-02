@@ -6,7 +6,7 @@
       <section id="filterSection" class="bg-white p-6 rounded-lg shadow-md mb-12">
         <div class="space-y-4">
           <div>
-            <label for="branch" class="block font-semibold text-gray-700">Khu vực</label>
+            <label for="branch" class="block font-semibold text-gray-700">Chi nhánh</label>
             <select name="branch" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
               <option value="" <% if (!selectedBranch) { %>selected<% } %>>Tất cả</option>
               <% allBranches.forEach(branch => { %>

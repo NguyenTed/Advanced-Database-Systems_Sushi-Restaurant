@@ -17,8 +17,6 @@ DROP PROCEDURE IF EXISTS SearchOrdersByCriteria;
 DROP PROCEDURE IF EXISTS SearchInvoicesByCriteria;
 DROP PROCEDURE IF EXISTS GenerateInvoiceForOrder;
 
-call GetMostOrderedDishesInRange(NULL, '2024-05-01', '2024-06-01')
-
 -- Chung: Đăng nhập tài khoản
 DELIMITER $$
 CREATE PROCEDURE CustomerLogin(IN p_username VARCHAR(50))
