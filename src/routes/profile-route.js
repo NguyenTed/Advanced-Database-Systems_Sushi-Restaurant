@@ -5,27 +5,50 @@ import bcrypt from 'bcrypt';
 const routes = Router();
 
 routes.get('/thong-tin-ca-nhan', async (req, res) => {
-  let membershipInfo = null;
-  let profile = req.profile;
+  let profileData = null;
 
   if (req.user.role === 'Khách hàng') {
-    membershipInfo = await db('membership_card').where('customer_id', profile.customer_id).first();
-  } else {
-    // Get employee department and branch names
-    const result = await db.raw(`CALL GetEmployeeInfo(${profile.employee_id})`);
-    const employeeInfo = result[0][0][0];
-    console.log(employeeInfo);
+    // Use GetCustomerInfo stored procedure
+    const result = await db.raw('CALL GetCustomerInfo(?)', [req.profile.customer_id]);
+    profileData = result[0][0][0]; // First row of first result set
 
-    profile = { ...profile, ...employeeInfo };
-    console.log(profile);
+    // Clean up property names
+    if (profileData) {
+      profileData = {
+        customer_id: profileData.CustomerID,
+        name: profileData.CustomerName,
+        phone_number: profileData.PhoneNumber,
+        email: profileData.Email,
+        personal_id: profileData.PersonalID,
+        date_of_birth: profileData.DateOfBirth,
+        gender: profileData.Gender,
+        membershipInfo: profileData.MembershipCardNumber
+          ? {
+              card_num: profileData.MembershipCardNumber,
+              type: profileData.MembershipType,
+              points: profileData.Points,
+              discount_amount: profileData.DiscountAmount,
+              issue_date: profileData.MembershipIssueDate
+            }
+          : null
+      };
+    }
+  } else {
+    // Use GetEmployeeInfo stored procedure
+    const result = await db.raw('CALL GetEmployeeInfo(?)', [req.profile.employee_id]);
+    profileData = result[0][0][0]; // First row of first result set
+  }
+
+  if (!profileData) {
+    return res.status(404).send('Profile not found');
   }
 
   res.render('layout/main-layout', {
     title: 'Thông tin cá nhân | Samurai Sushi',
     description: 'Thông tin cá nhân người dùng',
     content: '../pages/profile.ejs',
-    membershipInfo,
-    profile
+    profile: profileData,
+    membershipInfo: req.user.role === 'Khách hàng' ? profileData.membershipInfo : null
   });
 });
 

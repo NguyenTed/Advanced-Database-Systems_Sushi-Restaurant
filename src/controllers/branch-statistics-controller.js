@@ -109,6 +109,8 @@ export const renderBranchRevenue = async (req, res) => {
 export const renderBranchEmployees = async (req, res) => {
   const userBranchId = req.profile.branch_id;
   const { branchId, employeeId, period = 'day', year, month, yearLimit = 5, employmentStatus = 'all', search, page = 1 } = req.query;
+
+  // Access validation
   if (!validateBranchAccess(branchId, userBranchId)) {
     return res.status(403).render('layout/main-layout', {
       title: '403 - Không có quyền',
@@ -124,166 +126,63 @@ export const renderBranchEmployees = async (req, res) => {
   let availableYears = [];
   let totalEmployees = 0;
 
-  if (branchId) {
-    if (employeeId) {
-      // Get selected employee info
-      selectedEmployee = await db('employee')
-        .select('employee.employee_id', 'employee.name', 'department.name as department_name')
-        .join('department', 'employee.department_id', 'department.department_id')
-        .where('employee.employee_id', employeeId)
-        .first();
+  try {
+    if (branchId) {
+      if (employeeId) {
+        // First get employee basic info
+        selectedEmployee = await db('employee')
+          .join('department', 'employee.department_id', 'department.department_id')
+          .where('employee.employee_id', employeeId)
+          .select('employee.employee_id', 'employee.name', 'department.name as department_name')
+          .first();
 
-      // Get available years for service points
-      const yearsQuery = await db.raw(
-        `
-        SELECT DISTINCT YEAR(o.creation_date) as year
-        FROM \`order\` o
-        LEFT JOIN feedback f ON o.order_id = f.order_id
-        WHERE o.employee_id = ?
-        AND f.service_rating IS NOT NULL
-        ORDER BY year DESC`,
-        [employeeId]
-      );
-      availableYears = yearsQuery[0];
+        if (!selectedEmployee) {
+          return res.redirect(`/thong-ke/chi-nhanh/nhan-vien?branchId=${branchId}`);
+        }
 
-      // Get service points data based on period
-      let timeQuery = '';
-      switch (period) {
-        case 'day':
-          timeQuery = `
-            SELECT 
-              DATE(o.creation_date) as date,
-              CAST(AVG(f.service_rating) AS DECIMAL(10,2)) as avg_service_rating,
-              COUNT(*) as total_orders
-            FROM \`order\` o
-            LEFT JOIN feedback f ON o.order_id = f.order_id
-            WHERE o.employee_id = ?
-            ${year && month ? 'AND YEAR(o.creation_date) = ? AND MONTH(o.creation_date) = ?' : ''}
-            GROUP BY DATE(o.creation_date)
-            ORDER BY date ASC
-            LIMIT 30`;
-          break;
-        case 'month':
-          timeQuery = `
-            SELECT 
-              DATE_FORMAT(o.creation_date, '%Y-%m') as date,
-              CAST(AVG(f.service_rating) AS DECIMAL(10,2)) as avg_service_rating,
-              COUNT(*) as total_orders
-            FROM \`order\` o
-            LEFT JOIN feedback f ON o.order_id = f.order_id
-            WHERE o.employee_id = ?
-            ${year ? 'AND YEAR(o.creation_date) = ?' : ''}
-            GROUP BY DATE_FORMAT(o.creation_date, '%Y-%m')
-            ORDER BY date ASC
-            LIMIT 12`;
-          break;
-        case 'quarter':
-          timeQuery = `
-            SELECT 
-              CONCAT(YEAR(o.creation_date), '-Q', QUARTER(o.creation_date)) as date,
-              CAST(AVG(f.service_rating) AS DECIMAL(10,2)) as avg_service_rating,
-              COUNT(*) as total_orders
-            FROM \`order\` o
-            JOIN feedback f ON o.order_id = f.order_id
-            WHERE o.employee_id = ?
-            ${year ? 'AND YEAR(o.creation_date) = ?' : ''}
-            GROUP BY date
-            ORDER BY date ASC
-            LIMIT 4`;
-          break;
-        default: // year
-          timeQuery = `
-            SELECT 
-              YEAR(o.creation_date) as date,
-              CAST(AVG(f.service_rating) AS DECIMAL(10,2)) as avg_service_rating,
-              COUNT(*) as total_orders
-            FROM \`order\` o
-            LEFT JOIN feedback f ON o.order_id = f.order_id
-            WHERE o.employee_id = ?
-            GROUP BY YEAR(o.creation_date)
-            ORDER BY date ASC
-            LIMIT ?`;
+        // Then get service stats
+        const statsQuery = await db.raw('CALL GetEmployeeServiceStats(?, ?, ?, ?, ?)', [employeeId, period, year || null, month || null, yearLimit]);
+
+        availableYears = statsQuery[0][0].map((row) => row.year); // Get just the years
+        serviceData = statsQuery[0][1]; // Service stats
+      } else {
+        // Get employee list with filters
+        const listQuery = await db.raw('CALL GetEmployeesList(?, ?, ?, ?, ?)', [branchId, employmentStatus, search || null, Number(page), perPage]);
+
+        totalEmployees = listQuery[0][0][0].total; // First result set, first row
+        employees = listQuery[0][1]; // Second result set
       }
-
-      const params = [employeeId];
-      if (period === 'day' && year && month) {
-        params.push(year, month);
-      } else if ((period === 'month' || period === 'quarter') && year) {
-        params.push(year);
-      } else if (period === 'year') {
-        params.push(Number(yearLimit));
-      }
-
-      const serviceQuery = await db.raw(timeQuery, params);
-      serviceData = serviceQuery[0];
-    } else {
-      // Employee list query with pagination
-      let baseQuery = db('employee')
-        .join('department', 'employee.department_id', 'department.department_id')
-        .join('employee_work_history', 'employee.employee_id', 'employee_work_history.employee_id')
-        .where('employee_work_history.branch_id', branchId);
-
-      // Employment status filter
-      if (employmentStatus === 'current') {
-        baseQuery = baseQuery.whereNull('employee_work_history.end_date');
-      } else if (employmentStatus === 'former') {
-        baseQuery = baseQuery.whereNotNull('employee_work_history.end_date');
-      }
-
-      // Search filter
-      if (search) {
-        baseQuery = baseQuery.where(function () {
-          this.where('employee.name', 'like', `%${search}%`)
-            .orWhere('employee.phone_number', 'like', `%${search}%`)
-            .orWhere('employee.address', 'like', `%${search}%`)
-            .orWhere('department.name', 'like', `%${search}%`)
-            .orWhere(function () {
-              const salaryNum = parseFloat(search.replace(/[^0-9.-]+/g, ''));
-              if (!isNaN(salaryNum)) {
-                this.where('employee.salary', '=', salaryNum);
-              }
-            });
-        });
-      }
-
-      // Count total employees
-      const countResult = await baseQuery.clone().count('employee.employee_id as total').first();
-      totalEmployees = countResult.total;
-
-      // Get paginated employees
-      employees = await baseQuery
-        .select('employee.employee_id', 'employee.name', 'employee.phone_number', 'employee.address', 'employee.salary', 'department.name as department_name', 'employee_work_history.end_date')
-        .orderBy('employee.employee_id')
-        .limit(perPage)
-        .offset((Number(page) - 1) * perPage);
     }
+    
+    const branch = await db('branch').where('branch_id', branchId).first();
+    res.render('layout/main-layout', {
+      title: 'Nhân viên chi nhánh | Samurai Sushi',
+      description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
+      content: '../pages/statistics/branch/branch.ejs',
+      contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
+      branch,
+      selectedBranch: branchId,
+      employmentStatus,
+      searchTerm: search,
+      employees,
+      selectedEmployee,
+      selectedPeriod: period,
+      selectedYear: year,
+      selectedMonth: month,
+      yearLimit,
+      availableYears,
+      serviceData,
+      pagination: {
+        currentPage: Number(page),
+        perPage,
+        totalItems: totalEmployees,
+        totalPages: Math.ceil(totalEmployees / perPage)
+      }
+    });
+  } catch (error) {
+    console.error('Error in renderBranchEmployees:', error);
+    res.status(500).send('Server Error');
   }
-
-  const branch = await db('branch').where('branch_id', branchId).first();
-  res.render('layout/main-layout', {
-    title: 'Nhân viên chi nhánh | Samurai Sushi',
-    description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
-    content: '../pages/statistics/branch/branch.ejs',
-    contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
-    branch,
-    selectedBranch: branchId,
-    employmentStatus,
-    searchTerm: search,
-    employees,
-    selectedEmployee,
-    selectedPeriod: period,
-    selectedYear: year,
-    selectedMonth: month,
-    yearLimit,
-    availableYears,
-    serviceData,
-    pagination: {
-      currentPage: Number(page),
-      perPage,
-      totalItems: totalEmployees,
-      totalPages: Math.ceil(totalEmployees / perPage)
-    }
-  });
 };
 
 export const renderBranchCustomers = async (req, res) => {
