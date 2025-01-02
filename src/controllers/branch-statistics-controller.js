@@ -179,6 +179,7 @@ export const renderBranchEmployees = async (req, res) => {
 export const renderBranchCustomers = async (req, res) => {
   const userBranchId = req.profile.branch_id;
   const { branchId, search, page = 1, customerId } = req.query;
+
   if (!validateBranchAccess(branchId, userBranchId)) {
     return res.status(403).render('layout/main-layout', {
       title: '403 - Không có quyền',
@@ -194,59 +195,20 @@ export const renderBranchCustomers = async (req, res) => {
 
   if (branchId) {
     if (customerId) {
-      // Get selected customer with membership card info
-      selectedCustomer = await db('customer')
-        .select('customer.*', 'membership_card.card_num', 'membership_card.type', 'membership_card.points', 'membership_card.issue_date', 'membership_card.discount_amount')
-        .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id')
-        .where('customer.customer_id', customerId)
-        .first();
+      // Get customer detail
+      const customerResult = await db.raw('CALL GetCustomerDetail(?)', [customerId]);
+      selectedCustomer = customerResult[0][0][0];
     } else {
-      // Base conditions for search
-      const applyConditions = (query) => {
-        query.where('order.branch_id', branchId);
-        if (search) {
-          query.where(function () {
-            const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-            const matches = search.match(dateRegex);
+      // Get customers list
+      const result = await db.raw('CALL GetBranchCustomers(?, ?, ?, ?)', [branchId, search || null, Number(page), perPage]);
 
-            this.where('customer.name', 'like', `%${search}%`)
-              .orWhere('customer.phone_number', 'like', `%${search}%`)
-              .orWhere('customer.email', 'like', `%${search}%`)
-              .orWhere('customer.personal_id', 'like', `%${search}%`)
-              .orWhere('customer.gender', 'like', `${search}`);
-
-            if (matches) {
-              const [, day, month, year] = matches;
-              const mysqlDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-              this.orWhere('customer.date_of_birth', mysqlDate);
-            }
-          });
-        }
-        return query;
-      };
-
-      // Count query
-      const countQuery = db('customer').join('order', 'customer.customer_id', 'order.customer_id');
-      applyConditions(countQuery);
-      const countResult = await countQuery.countDistinct('customer.customer_id as total').first();
-      totalCustomers = countResult.total;
-
-      // Data query
-      const dataQuery = db('customer')
-        .select('customer.customer_id', 'customer.name', 'customer.phone_number', 'customer.email', 'customer.personal_id', 'customer.date_of_birth', 'customer.gender', 'membership_card.card_num')
-        .distinct()
-        .join('order', 'customer.customer_id', 'order.customer_id')
-        .leftJoin('membership_card', 'customer.customer_id', 'membership_card.customer_id');
-
-      applyConditions(dataQuery);
-      customers = await dataQuery
-        .orderBy('customer.customer_id')
-        .limit(perPage)
-        .offset((Number(page) - 1) * perPage);
+      totalCustomers = result[0][0][0].total;
+      customers = result[0][1];
     }
   }
 
   const branch = await db('branch').where('branch_id', branchId).first();
+
   res.render('layout/main-layout', {
     title: 'Khách hàng chi nhánh | Samurai Sushi',
     description: 'Thống kê khách hàng chi nhánh Samurai Sushi',
