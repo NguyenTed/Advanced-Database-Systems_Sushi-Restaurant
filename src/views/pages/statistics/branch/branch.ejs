@@ -26,12 +26,16 @@
         class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/hoa-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
         Hóa đơn
       </a>
+      <a href="/thong-ke/chi-nhanh/mon-an?branchId=<%= selectedBranch %>"
+        class="text-lg rounded-full <%= path === '/thong-ke/chi-nhanh/mon-an' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+        Món ăn
+      </a>
     </div>
 
     <!-- Content Section -->
-    <% if (typeof contentPath !=='undefined' ) { %>
-      <%- include(contentPath) %>
-        <% } %>
+    <% if (typeof contentPath !== 'undefined') { %>
+    <%- include(contentPath) %>
+    <% } %>
   </div>
 </div>
 

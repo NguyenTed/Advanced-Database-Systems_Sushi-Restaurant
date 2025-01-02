@@ -6,12 +6,12 @@
       <section id="filterSection" class="bg-white p-6 rounded-lg shadow-md mb-12">
         <div class="space-y-4">
           <div>
-            <label for="area" class="block font-semibold text-gray-700">Khu vực</label>
-            <select name="area" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
-              <option value="" <% if (!selectedArea) { %>selected<% } %>>Tất cả</option>
-              <% allAreas.forEach(area=> { %>
-                <option value="<%- area.area_id %>" <% if (selectedArea?.name===area.name ) { %>selected<% } %>><%-
-                      area.name %></option>
+            <label for="branch" class="block font-semibold text-gray-700">Chi nhánh</label>
+            <select name="branch" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
+              <option value="" <% if (!selectedBranch) { %>selected<% } %>>Tất cả</option>
+              <% allBranches.forEach(branch => { %>
+                <option value="<%- branch.branch_id %>" <% if (selectedBranch?.name === branch.name ) { %>selected<% } %>><%-
+                    branch.name %></option>
                 <% }) %>
             </select>
           </div>
@@ -20,18 +20,9 @@
             <select name="category" class="w-full p-2 mt-1 border rounded-lg" onchange="this.form.submit();">
               <option value="" <% if (!selectedCategory) { %>selected<% } %>>Tất cả</option>
               <% allCategories.forEach(category=> { %>
-                <option value="<%- category.category_id %>" <% if (selectedCategory?.name===category.name ) { %>selected
-                  <% } %>><%- category.name %></option>
-                <% }) %>
-            </select>
-          </div>
-          <div>
-            <label for="priceRange" class="block font-semibold text-gray-700">Khoảng giá</label>
-            <select name="priceRange" class="w-full p-2 mt-1 border rounded-lg">
-              <option value="">Tất cả</option>
-              <option value="low">Dưới 100,000 VND</option>
-              <option value="mid">100,000 - 200,000 VND</option>
-              <option value="high">Trên 200,000 VND</option>
+              <option value="<%- category.category_id %>" <% if (selectedCategory?.name===category.name ) { %>selected
+                <% } %>><%- category.name %></option>
+              <% }) %>
             </select>
           </div>
         </div>

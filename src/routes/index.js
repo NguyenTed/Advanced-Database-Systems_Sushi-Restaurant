@@ -16,7 +16,7 @@ routes.use((req, res, next) => {
   next();
 });
 
-routes.use('/tai-khoan', authRoute);
+routes.use(authRoute);
 routes.use(homeRoute);
 routes.use(menuRoute);
 routes.use(branchStatisticsRoute);

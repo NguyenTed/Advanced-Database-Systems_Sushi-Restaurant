@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../config/db.js';
+import { formatDate } from '../utils/common.js';
 
 const routes = Router();
 
@@ -56,36 +57,48 @@ routes.post('/dat-ban', async (req, res) => {
     const table_id = table.table_id;
 
     // Tạo order và lưu vào bảng order
-    const reservationDate = new Date(`${date}T${time}`);
-    const [order_id] = await db('order')
-      .insert({
-        creation_date: new Date(),
-        status: 'Pending',
-        branch_id: branch_id,
-        customer_id: req.profile.customer_id
-      })
-      .returning('order_id');
+    const servingDate = new Date(`${date}T${time}`);
+    // const [order_id] = await db('order')
+    //   .insert({
+    //     creation_date: new Date(),
+    //     status: 'Pending',
+    //     branch_id: branch_id,
+    //     customer_id: req.profile.customer_id
+    //   })
+    //   .returning('order_id');
 
-    // Lưu vào bảng eat_in_order
-    await db('eat_in_order').insert({
-      eat_in_order_id: order_id,
-      serving_date: reservationDate,
-      num_guest: guests,
-      branch_id: branch_id,
-      table_id: table_id
-    });
+    // // Lưu vào bảng eat_in_order
+    // await db('eat_in_order').insert({
+    //   eat_in_order_id: order_id,
+    //   serving_date: servingDate,
+    //   num_guest: guests,
+    //   branch_id: branch_id,
+    //   table_id: table_id
+    // });
 
     // Lưu thông tin các món ăn vào bảng order_detail
     const orderDetails = Object.entries(dishes)
       .filter(([_, quantity]) => quantity > 0) // Lọc các món có số lượng > 0
       .map(([dish_id, quantity]) => ({
-        order_id: order_id,
         dish_id: parseInt(dish_id) + 1,
         quantity: parseInt(quantity)
       }));
 
+    console.log(orderDetails);
+
     if (orderDetails.length > 0) {
-      await db('order_detail').insert(orderDetails);
+      // await db('order_detail').insert(orderDetails);
+      const orderDetailsJSON = JSON.stringify(orderDetails);
+
+      try {
+        // Use parameterized queries to safely pass variables
+        const result = await db.raw(`CALL ReserveAndOrderWeb(?, ?, ?, ?, '${orderDetailsJSON}')`, [req.profile.customer_id, parseInt(branch_id), parseInt(guests), servingDate]);
+
+        console.log('Procedure result:', result);
+        console.log(result[0][0]);
+      } catch (error) {
+        console.error('Error calling procedure:', error.message);
+      }
     }
 
     // Render giao diện thành công
@@ -95,10 +108,9 @@ routes.post('/dat-ban', async (req, res) => {
       title: 'Đặt bàn | Samurai Sushi',
       description: 'Đặt bàn tại Samurai Sushi',
       content: '../pages/success.ejs',
-
       guests,
       table_id,
-      reservationDate,
+      servingDate,
       branch_name: branch_name
     });
   } catch (error) {
