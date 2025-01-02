@@ -49,6 +49,10 @@
           class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/hoa-don' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
           Hóa đơn
         </a>
+        <a href="/thong-ke/cong-ty/mon-an<%= selectedArea ? '?areaId=' + selectedArea : '' %><%= selectedBranch ? (selectedArea ? '&' : '?') + 'branchId=' + selectedBranch : '' %>"
+          class="text-lg rounded-full <%= path === '/thong-ke/cong-ty/mon-an' ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
+          Món ăn
+        </a>
       </div>
     </div>
     <!-- Content Section -->

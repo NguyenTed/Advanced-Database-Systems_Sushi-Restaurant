@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { handleLogIn, handleSignUp, renderSignUpPage, handleLogOut, renderLogInPage } from '../controllers/auth-controller.js';
 
-const router = Router();
-router.use((req, res, next) => {
-  res.locals.path = req.path;
-  next();
+const routes = Router();
+
+routes.get('/tai-khoan', (req, res) => {
+  res.redirect('/tai-khoan/dang-nhap');
 });
 
-router.get('/dang-nhap', renderLogInPage);
-router.get('/dang-ky', renderSignUpPage);
-router.post('/dang-ky', handleSignUp);
-router.post('/dang-nhap', handleLogIn);
-router.get('/dang-xuat', handleLogOut);
+routes.get('/tai-khoan/dang-nhap', renderLogInPage);
+routes.get('/tai-khoan/dang-ky', renderSignUpPage);
+routes.post('/tai-khoan/dang-ky', handleSignUp);
+routes.post('/tai-khoan/dang-nhap', handleLogIn);
+routes.get('/tai-khoan/dang-xuat', handleLogOut);
 
-export default router;
+export default routes;
