@@ -1,202 +1,195 @@
 <div class="bg-gray-50 py-8">
-    <div class="container mx-auto px-4">
-        <!-- Area Selection -->
-        <div class="max-w-6xl mx-auto mb-12">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Chọn khu vực</h2>
+  <div class="container mx-auto px-4">
+    <!-- Area Selection -->
+    <div class="max-w-6xl mx-auto mb-12">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Chọn khu vực</h2>
 
-                <!-- Swiper Carousel -->
-                <div class="swiper areaSwiper">
-                    <div class="swiper-wrapper">
-                        <!-- All Areas Button -->
-                        <div class="swiper-slide">
-                            <a href="/chi-nhanh"
-                                class="inline-block text-lg rounded-full <%= !selectedArea ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
-                                Tất cả (<%= areas.reduce((sum, area)=> sum + Number(area.branchCount), 0) %>)
-                            </a>
-                        </div>
-
-                        <!-- Area Buttons -->
-                        <% areas.forEach(area=> { %>
-                            <div class="swiper-slide">
-                                <a href="/chi-nhanh?area=<%= area.area_id %>"
-                                    class="inline-block text-lg rounded-full <%= selectedArea == area.area_id ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all">
-                                    <%= area.name %> (<%= area.branchCount %>)
-                                </a>
-                            </div>
-                            <% }); %>
-                    </div>
-
-                    <!-- Navigation Buttons -->
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                </div>
+        <!-- Swiper Carousel -->
+        <div class="swiper areaSwiper">
+          <div class="swiper-wrapper">
+            <!-- All Areas Button -->
+            <div class="swiper-slide">
+              <a
+                href="/chi-nhanh"
+                class="inline-block text-lg rounded-full <%= !selectedArea ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+              >
+                Tất cả (<%= areas.reduce((sum, area)=> sum + Number(area.branchCount), 0) %>)
+              </a>
             </div>
+
+            <!-- Area Buttons -->
+            <% areas.forEach(area=> { %>
+            <div class="swiper-slide">
+              <a
+                href="/chi-nhanh?area=<%= area.area_id %>"
+                class="inline-block text-lg rounded-full <%= selectedArea == area.area_id ? 'bg-red-600 text-white' : 'bg-gray-200 text-black' %> py-2 px-6 hover:text-white hover:bg-red-600 hover:scale-105 transition-all"
+              >
+                <%= area.name %> (<%= area.branchCount %>)
+              </a>
+            </div>
+            <% }); %>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
         </div>
-
-        <!-- Branches Grid -->
-        <div class="max-w-6xl mx-auto">
-            <% const filteredBranches=branches.filter(branch=> !selectedArea || branch.area_id == selectedArea); %>
-
-                <% if (filteredBranches.length===0) { %>
-                    <div class="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow-md">
-                        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        <p class="text-xl text-gray-600">Hiện không có chi nhánh nào ở khu vực này</p>
-                    </div>
-                    <% } else { %>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <% filteredBranches.forEach(branch=> { %>
-                                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer">
-                                    <!-- Branch Image -->
-                                    <img src="https://tokyodeli.com.vn/Data/Sites/3/media/img_0096.jpg"
-                                        alt="<%= branch.name %>" class="w-full h-48 object-cover">
-
-                                    <!-- Branch Info -->
-                                    <div class="p-6">
-                                        <h3 class="text-xl font-bold text-gray-800 mb-2">
-                                            <%= branch.name %>
-                                        </h3>
-
-                                        <!-- Location Info -->
-                                        <div class="mb-4">
-                                            <p class="text-gray-600 flex items-center mb-2">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                <%= branch.address %>
-                                            </p>
-                                            <p class="text-gray-600 flex items-center">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                </svg>
-                                                <%= branch.phone_number %>
-                                            </p>
-                                        </div>
-
-                                        <!-- Operating Hours -->
-                                        <div class="mb-4">
-                                            <p class="text-gray-600 flex items-center">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <%= branch.open_time.slice(0,5) %> - <%= branch.close_time.slice(0,5) %>
-                                            </p>
-                                        </div>
-
-                                        <!-- Facilities -->
-                                        <div class="flex flex-wrap gap-2">
-                                            <% if (branch.car_parking_availability) { %>
-                                                <span
-                                                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Bãi
-                                                    đỗ ô
-                                                    tô</span>
-                                                <% } %>
-                                                    <% if (branch.bike_parking_availability) { %>
-                                                        <span
-                                                            class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Bãi
-                                                            đỗ xe
-                                                            máy</span>
-                                                        <% } %>
-                                                            <% if (branch.delivery_availability) { %>
-                                                                <span
-                                                                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Giao
-                                                                    hàng</span>
-                                                                <% } %>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% }); %>
-                        </div>
-                        <% } %>
-        </div>
-
+      </div>
     </div>
+
+    <!-- Branches Grid -->
+    <div class="max-w-6xl mx-auto">
+      <% const filteredBranches=branches.filter(branch=> !selectedArea || branch.area_id == selectedArea); %>
+
+      <% if (filteredBranches.length===0) { %>
+      <div class="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow-md">
+        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
+        </svg>
+        <p class="text-xl text-gray-600">Hiện không có chi nhánh nào ở khu vực này</p>
+      </div>
+      <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% filteredBranches.forEach(branch=> { %>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer">
+          <!-- Branch Image -->
+          <img src="https://tokyodeli.com.vn/Data/Sites/3/media/img_0096.jpg" alt="<%= branch.name %>" class="w-full h-48 object-cover" />
+
+          <!-- Branch Info -->
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><%= branch.name %></h3>
+
+            <!-- Location Info -->
+            <div class="mb-4">
+              <p class="text-gray-600 flex items-center mb-2">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <%= branch.address %>
+              </p>
+              <p class="text-gray-600 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+                <%= branch.phone_number %>
+              </p>
+            </div>
+
+            <!-- Operating Hours -->
+            <div class="mb-4">
+              <p class="text-gray-600 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <%= branch.open_time.slice(0,5) %>
+                -
+                <%= branch.close_time.slice(0,5) %>
+              </p>
+            </div>
+
+            <!-- Facilities -->
+            <div class="flex flex-wrap gap-2">
+              <% if (branch.car_parking_availability) { %>
+              <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Bãi đỗ ô tô</span>
+              <% } %>
+              <% if (branch.bike_parking_availability) { %>
+              <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Bãi đỗ xe máy</span>
+              <% } %>
+              <% if (branch.delivery_availability) { %>
+              <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Giao hàng</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <% } %>
+    </div>
+  </div>
 </div>
 
 <!-- Swiper Initialization -->
 <script>
-    document.querySelectorAll('.swiper-slide a').forEach(link => {
-        link.addEventListener('click', function () {
-            // Save the active index of the Swiper instance
-            const activeIndex=swiper.activeIndex;
-            localStorage.setItem('swiperActiveIndex', activeIndex);
-        });
+  document.querySelectorAll('.swiper-slide a').forEach((link) => {
+    link.addEventListener('click', function () {
+      // Save the active index of the Swiper instance
+      const activeIndex = swiper.activeIndex;
+      localStorage.setItem('swiperActiveIndex', activeIndex);
     });
-    window.addEventListener('DOMContentLoaded', function () {
-        const savedIndex=localStorage.getItem('swiperActiveIndex');
+  });
+  window.addEventListener('DOMContentLoaded', function () {
+    const savedIndex = localStorage.getItem('swiperActiveIndex');
 
-        if (savedIndex) {
-            swiper.slideTo(Number(savedIndex), 0, false); // Slide to saved index without animation
-        }
-    });
+    if (savedIndex) {
+      swiper.slideTo(Number(savedIndex), 0, false); // Slide to saved index without animation
+    }
+  });
 
-    var swiper=new Swiper(".areaSwiper", {
-        slidesPerView: "auto",
-        spaceBetween: 16,
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-        breakpoints: {
-            640: {
-                slidesPerView: 3,
-            },
-            768: {
-                slidesPerView: 4,
-            },
-            1024: {
-                slidesPerView: 5,
-            },
-        },
-        watchSlidesProgress: true, // Track slide progress
-        observer: true, // Observe DOM changes
-        observeParents: true, // Observe parent changes
-    });
+  var swiper = new Swiper('.areaSwiper', {
+    slidesPerView: 'auto',
+    spaceBetween: 16,
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev'
+    },
+    breakpoints: {
+      640: {
+        slidesPerView: 3
+      },
+      768: {
+        slidesPerView: 4
+      },
+      1024: {
+        slidesPerView: 5
+      }
+    },
+    watchSlidesProgress: true, // Track slide progress
+    observer: true, // Observe DOM changes
+    observeParents: true // Observe parent changes
+  });
 </script>
 
 <style>
-    .swiper-slide {
-        width: auto !important;
-    }
+  .swiper-slide {
+    width: auto !important;
+  }
 
-    .swiper-button-next,
-    .swiper-button-prev {
-        width: 40px;
-        height: 40px;
-        background-color: #dc2626;
-        /* bg-red-600 */
-        border-radius: 50%;
-        color: white !important;
-    }
+  .swiper-button-next,
+  .swiper-button-prev {
+    width: 40px;
+    height: 40px;
+    background-color: #dc2626;
+    /* bg-red-600 */
+    border-radius: 50%;
+    color: white !important;
+  }
 
-    .swiper-button-next:hover,
-    .swiper-button-prev:hover {
-        background-color: #b91c1c;
-        /* bg-red-700 */
-    }
+  .swiper-button-next:hover,
+  .swiper-button-prev:hover {
+    background-color: #b91c1c;
+    /* bg-red-700 */
+  }
 
-    .swiper-button-next::after,
-    .swiper-button-prev::after {
-        font-size: 20px;
-        font-weight: bold;
-    }
+  .swiper-button-next::after,
+  .swiper-button-prev::after {
+    font-size: 20px;
+    font-weight: bold;
+  }
 
-    /* Add padding to container to prevent button cutoff */
-    .swiper {
-        padding: 0 70px !important;
-    }
+  /* Add padding to container to prevent button cutoff */
+  .swiper {
+    padding: 0 70px !important;
+  }
 </style>
