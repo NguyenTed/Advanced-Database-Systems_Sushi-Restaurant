@@ -126,63 +126,54 @@ export const renderBranchEmployees = async (req, res) => {
   let availableYears = [];
   let totalEmployees = 0;
 
-  try {
-    if (branchId) {
-      if (employeeId) {
-        // First get employee basic info
-        selectedEmployee = await db('employee')
-          .join('department', 'employee.department_id', 'department.department_id')
-          .where('employee.employee_id', employeeId)
-          .select('employee.employee_id', 'employee.name', 'department.name as department_name')
-          .first();
+  if (branchId) {
+    if (employeeId) {
+      // First get employee basic info
+      selectedEmployee = await db('employee')
+        .join('department', 'employee.department_id', 'department.department_id')
+        .where('employee.employee_id', employeeId)
+        .select('employee.employee_id', 'employee.name', 'department.name as department_name')
+        .first();
 
-        if (!selectedEmployee) {
-          return res.redirect(`/thong-ke/chi-nhanh/nhan-vien?branchId=${branchId}`);
-        }
+      // Then get service stats
+      const statsQuery = await db.raw('CALL GetEmployeeServiceStats(?, ?, ?, ?, ?)', [employeeId, period, year || null, month || null, yearLimit]);
 
-        // Then get service stats
-        const statsQuery = await db.raw('CALL GetEmployeeServiceStats(?, ?, ?, ?, ?)', [employeeId, period, year || null, month || null, yearLimit]);
+      availableYears = statsQuery[0][0].map((row) => row.year); // Get just the years
+      serviceData = statsQuery[0][1]; // Service stats
+    } else {
+      // Get employee list with filters
+      const listQuery = await db.raw('CALL GetEmployeesList(?, ?, ?, ?, ?)', [branchId, employmentStatus, search || null, Number(page), perPage]);
 
-        availableYears = statsQuery[0][0].map((row) => row.year); // Get just the years
-        serviceData = statsQuery[0][1]; // Service stats
-      } else {
-        // Get employee list with filters
-        const listQuery = await db.raw('CALL GetEmployeesList(?, ?, ?, ?, ?)', [branchId, employmentStatus, search || null, Number(page), perPage]);
-
-        totalEmployees = listQuery[0][0][0].total; // First result set, first row
-        employees = listQuery[0][1]; // Second result set
-      }
+      totalEmployees = listQuery[0][0][0].total; // First result set, first row
+      employees = listQuery[0][1]; // Second result set
     }
-    
-    const branch = await db('branch').where('branch_id', branchId).first();
-    res.render('layout/main-layout', {
-      title: 'Nhân viên chi nhánh | Samurai Sushi',
-      description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
-      content: '../pages/statistics/branch/branch.ejs',
-      contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
-      branch,
-      selectedBranch: branchId,
-      employmentStatus,
-      searchTerm: search,
-      employees,
-      selectedEmployee,
-      selectedPeriod: period,
-      selectedYear: year,
-      selectedMonth: month,
-      yearLimit,
-      availableYears,
-      serviceData,
-      pagination: {
-        currentPage: Number(page),
-        perPage,
-        totalItems: totalEmployees,
-        totalPages: Math.ceil(totalEmployees / perPage)
-      }
-    });
-  } catch (error) {
-    console.error('Error in renderBranchEmployees:', error);
-    res.status(500).send('Server Error');
   }
+
+  const branch = await db('branch').where('branch_id', branchId).first();
+  res.render('layout/main-layout', {
+    title: 'Nhân viên chi nhánh | Samurai Sushi',
+    description: 'Thống kê nhân viên chi nhánh Samurai Sushi',
+    content: '../pages/statistics/branch/branch.ejs',
+    contentPath: employeeId ? '../branch/employee-service-points.ejs' : '../branch/employees.ejs',
+    branch,
+    selectedBranch: branchId,
+    employmentStatus,
+    searchTerm: search,
+    employees,
+    selectedEmployee,
+    selectedPeriod: period,
+    selectedYear: year,
+    selectedMonth: month,
+    yearLimit,
+    availableYears,
+    serviceData,
+    pagination: {
+      currentPage: Number(page),
+      perPage,
+      totalItems: totalEmployees,
+      totalPages: Math.ceil(totalEmployees / perPage)
+    }
+  });
 };
 
 export const renderBranchCustomers = async (req, res) => {
@@ -367,43 +358,33 @@ export const renderBranchDishes = async (req, res) => {
   let worstSelling = [];
   let totalRevenue = 0;
 
-  try {
-    let dishesData = [];
-    let bestSelling = [];
-    let worstSelling = [];
-    let totalRevenue = 0;
+  if (branchId) {
+    const query = await db.raw('CALL GetMostOrderedDishesInRange(?, ?, ?, ?, ?)', [branchId, startDate || null, endDate || null, sortBy, sortOrder]);
 
-    if (branchId) {
-      const query = await db.raw('CALL GetMostOrderedDishesInRange(?, ?, ?, ?, ?)', [branchId, startDate || null, endDate || null, sortBy, sortOrder]);
-
-      dishesData = query[0][0];
-      const sortedByQuantity = [...dishesData].sort((a, b) => b.quantity - a.quantity);
-      bestSelling = sortedByQuantity.slice(0, 5);
-      worstSelling = sortedByQuantity.slice(-5).reverse();
-      totalRevenue = dishesData.reduce((sum, dish) => sum + Number(dish.revenue), 0);
-    }
-
-    const branch = await db('branch').where('branch_id', branchId).first();
-
-    res.render('layout/main-layout', {
-      title: 'Thống kê món ăn | Samurai Sushi',
-      description: 'Thống kê món ăn chi nhánh Samurai Sushi',
-      content: '../pages/statistics/branch/branch.ejs',
-      contentPath: '../branch/dishes.ejs', // Add this line
-      path: '/thong-ke/chi-nhanh/mon-an', // Add this line
-      branch,
-      selectedBranch: branchId,
-      dishesData,
-      bestSelling,
-      worstSelling,
-      totalRevenue,
-      startDate,
-      endDate,
-      sortBy,
-      sortOrder
-    });
-  } catch (error) {
-    console.error('Error in renderBranchDishes:', error);
-    res.status(500).send('Server Error');
+    dishesData = query[0][0];
+    const sortedByQuantity = [...dishesData].sort((a, b) => b.quantity - a.quantity);
+    bestSelling = sortedByQuantity.slice(0, 5);
+    worstSelling = sortedByQuantity.slice(-5).reverse();
+    totalRevenue = dishesData.reduce((sum, dish) => sum + Number(dish.revenue), 0);
   }
+
+  const branch = await db('branch').where('branch_id', branchId).first();
+
+  res.render('layout/main-layout', {
+    title: 'Thống kê món ăn | Samurai Sushi',
+    description: 'Thống kê món ăn chi nhánh Samurai Sushi',
+    content: '../pages/statistics/branch/branch.ejs',
+    contentPath: '../branch/dishes.ejs', // Add this line
+    path: '/thong-ke/chi-nhanh/mon-an', // Add this line
+    branch,
+    selectedBranch: branchId,
+    dishesData,
+    bestSelling,
+    worstSelling,
+    totalRevenue,
+    startDate,
+    endDate,
+    sortBy,
+    sortOrder
+  });
 };

@@ -120,10 +120,6 @@ export const renderBranchEmployees = async (req, res) => {
         .select('employee.employee_id', 'employee.name', 'department.name as department_name')
         .first();
 
-      if (!selectedEmployee) {
-        return res.redirect(`/thong-ke/chi-nhanh/nhan-vien?branchId=${branchId}`);
-      }
-
       // Then get service stats
       const statsQuery = await db.raw('CALL GetEmployeeServiceStats(?, ?, ?, ?, ?)', [employeeId, period, year || null, month || null, yearLimit]);
 
@@ -175,37 +171,32 @@ export const getEditEmployee = async (req, res) => {
     return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
   }
 
-  try {
-    const employee = await db('EMPLOYEE')
-      .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
-      .where('EMPLOYEE.employee_id', employeeId)
-      .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
-      .first();
+  const employee = await db('EMPLOYEE')
+    .join('DEPARTMENT', 'EMPLOYEE.department_id', 'DEPARTMENT.department_id')
+    .where('EMPLOYEE.employee_id', employeeId)
+    .select('EMPLOYEE.*', 'DEPARTMENT.name as department_name')
+    .first();
 
-    if (!employee) {
-      return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
-    }
-
-    const departments = await db('DEPARTMENT').select('name');
-    const branches = await db('branch'); // Need branches for company layout
-
-    res.render('layout/main-layout', {
-      title: 'Chỉnh sửa nhân viên | Samurai Sushi',
-      description: 'Chỉnh sửa thông tin nhân viên',
-      content: '../pages/statistics/company/company.ejs',
-      contentPath: '../company/edit-employee.ejs',
-      path: '/thong-ke/cong-ty/nhan-vien',
-      areas,
-      selectedArea: areaId,
-      branches,
-      selectedBranch: branchId,
-      employee,
-      departments
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server Error');
+  if (!employee) {
+    return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
   }
+
+  const departments = await db('DEPARTMENT').select('name');
+  const branches = await db('branch'); // Need branches for company layout
+
+  res.render('layout/main-layout', {
+    title: 'Chỉnh sửa nhân viên | Samurai Sushi',
+    description: 'Chỉnh sửa thông tin nhân viên',
+    content: '../pages/statistics/company/company.ejs',
+    contentPath: '../company/edit-employee.ejs',
+    path: '/thong-ke/cong-ty/nhan-vien',
+    areas,
+    selectedArea: areaId,
+    branches,
+    selectedBranch: branchId,
+    employee,
+    departments
+  });
 };
 
 export const postEditEmployee = async (req, res) => {
