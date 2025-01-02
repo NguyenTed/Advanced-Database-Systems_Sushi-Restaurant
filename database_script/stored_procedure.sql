@@ -15,6 +15,9 @@ DROP PROCEDURE IF EXISTS TransferEmployee;
 DROP PROCEDURE IF EXISTS GetMostOrderedDishesInRange;
 DROP PROCEDURE IF EXISTS SearchOrdersByCriteria;
 DROP PROCEDURE IF EXISTS SearchInvoicesByCriteria;
+DROP PROCEDURE IF EXISTS GenerateInvoiceForOrder;
+
+call GetMostOrderedDishesInRange(NULL, '2024-05-01', '2024-06-01')
 
 -- Chung: Đăng nhập tài khoản
 DELIMITER $$
@@ -537,4 +540,31 @@ BEGIN
     ORDER BY 
         i.issue_date DESC;
 END$$
+DELIMITER ;
+
+-- Quản lí chi nhánh: Tạo hoá đơn cho đơn hàng
+DELIMITER $$
+CREATE PROCEDURE GenerateInvoiceForOrder(IN customer_id INT, IN order_id INT)
+BEGIN
+    DECLARE total_amount DECIMAL(10, 2);
+    DECLARE points_earned INT;
+
+    -- Tính tổng tiền
+    SELECT SUM(od.quantity * d.price) INTO total_amount
+    FROM ORDER_DETAIL od
+    JOIN DISH d ON od.dish_id = d.dish_id
+    WHERE od.order_id = order_id;
+
+    -- Điểm cho khách hàng
+    SET points_earned = FLOOR(total_amount / 1000);
+
+    -- Thêm vào bảng
+    INSERT INTO INVOICE (order_id, total_amount, discount_amount, points_earned, issue_date, customer_id)
+    VALUES (order_id, total_amount, 0.00, points_earned, NOW(), customer_id);
+
+    -- Cập nhật điểm cho khách hàng
+    UPDATE MEMBERSHIP_CARD
+    SET points = points + points_earned
+    WHERE customer_id = customer_id;
+END $$
 DELIMITER ;
