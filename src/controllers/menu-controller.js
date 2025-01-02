@@ -6,11 +6,13 @@ export const renderMenuPage = async (req, res) => {
   let selectedBranch = branch ? await db('branch').where('branch_id', branch).first() : null;
 
   const data = {
-    searchKeyword: searchValue,
-    category: category ? category : null,
+    searchKeyword: searchValue || null,
+    category: category || null,
     area: null,
-    branch: branch ? branch : null
+    branch: branch || null
   };
+
+  console.log(data);
 
   const dishes = await db.raw(`CALL GetDishes(?, ?, ?, ?)`, [data.searchKeyword, data.category, data.area, data.branch]);
 
