@@ -2,7 +2,7 @@ import { db } from '../config/db.js';
 
 export const signupNewCustomer = async (data) => {
   try {
-    const result = await db.raw(`CALL sp_SignupNewCustomer(?, ?, ?, ?, ?, ?, ?, ?)`, [
+    const result = await db.raw(`CALL RegisterCustomer(?, ?, ?, ?, ?, ?, ?, ?)`, [
       data.username,
       data.password,
       data.name,

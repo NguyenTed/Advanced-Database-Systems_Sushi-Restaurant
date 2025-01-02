@@ -21,109 +21,64 @@ export const renderBranchStatistics = async (req, res) => {
 };
 
 export const renderBranchRevenue = async (req, res) => {
-  const { branchId, period = 'day', year, month, yearLimit = 5, areaId, type } = req.query;
+  const { branchId, period = 'day', year, month, yearLimit = 5, areaId } = req.query; // Default to 'day'
   const areas = await getAreasData();
   let revenueData = [];
   let availableYears = [];
   let availableMonths = [];
 
-  // Get available years for either company or branch view
-  const yearsQuery = await db.raw(
-    `
-    SELECT DISTINCT YEAR(i.issue_date) as year
-    FROM invoice i
-    JOIN \`order\` o ON i.order_id = o.order_id
-    ${branchId ? 'WHERE o.branch_id = ?' : ''}
-    ORDER BY year DESC`,
-    branchId ? [branchId] : []
-  );
-  availableYears = yearsQuery[0];
-
-  // Get available months if year is selected
-  if (year) {
-    const monthsQuery = await db.raw(
+  if (branchId) {
+    // Get available years
+    const yearsQuery = await db.raw(
       `
-      SELECT DISTINCT MONTH(i.issue_date) as month
+      SELECT DISTINCT YEAR(i.issue_date) as year
       FROM invoice i
       JOIN \`order\` o ON i.order_id = o.order_id
-      ${branchId ? 'WHERE o.branch_id = ?' : ''} 
-      ${year ? `${branchId ? 'AND' : 'WHERE'} YEAR(i.issue_date) = ?` : ''}
-      ORDER BY month ASC`,
-      branchId ? [branchId, year] : [year]
+      WHERE o.branch_id = ?
+      ORDER BY year DESC`,
+      [branchId]
     );
-    availableMonths = monthsQuery[0];
-  }
+    availableYears = yearsQuery[0];
 
-  let timeQuery = '';
-  switch (period) {
-    case 'month':
-      timeQuery = `
-        SELECT 
-          DATE_FORMAT(i.issue_date, '%Y-%m') as date,
-          COUNT(DISTINCT o.branch_id) as branch_count,
-          SUM(i.total_amount) as revenue
+    // Get available months if year is selected
+    if (year) {
+      const monthsQuery = await db.raw(
+        `
+        SELECT DISTINCT MONTH(i.issue_date) as month
         FROM invoice i
         JOIN \`order\` o ON i.order_id = o.order_id
-        ${branchId ? 'WHERE o.branch_id = ?' : ''}
-        ${year ? `${branchId ? 'AND' : 'WHERE'} YEAR(i.issue_date) = ?` : ''}
-        GROUP BY DATE_FORMAT(i.issue_date, '%Y-%m')
-        ORDER BY date ASC
-        LIMIT 12`;
-      break;
-    case 'quarter':
-      timeQuery = `
-        SELECT 
-          CONCAT(YEAR(i.issue_date), '-Q', QUARTER(i.issue_date)) as date,
-          COUNT(DISTINCT o.branch_id) as branch_count,
-          SUM(i.total_amount) as revenue
-        FROM invoice i
-        JOIN \`order\` o ON i.order_id = o.order_id
-        ${branchId ? 'WHERE o.branch_id = ?' : ''}
-        ${year ? `${branchId ? 'AND' : 'WHERE'} YEAR(i.issue_date) = ?` : ''}
-        GROUP BY date
-        ORDER BY date ASC
-        LIMIT 8`;
-      break;
-    case 'year':
-      timeQuery = `
-        SELECT 
-          YEAR(i.issue_date) as date,
-          COUNT(DISTINCT o.branch_id) as branch_count,
-          SUM(i.total_amount) as revenue
-        FROM invoice i
-        JOIN \`order\` o ON i.order_id = o.order_id
-        ${branchId ? 'WHERE o.branch_id = ?' : ''}
-        GROUP BY YEAR(i.issue_date)
-        ORDER BY date ASC
-        LIMIT ?`;
-      break;
-    default: // day
-      timeQuery = `
-        SELECT 
-          DATE(i.issue_date) as date,
-          COUNT(DISTINCT o.branch_id) as branch_count,
-          SUM(i.total_amount) as revenue
-        FROM invoice i
-        JOIN \`order\` o ON i.order_id = o.order_id
-        ${branchId ? 'WHERE o.branch_id = ?' : ''}
-        ${year && month ? `${branchId ? 'AND' : 'WHERE'} YEAR(i.issue_date) = ? AND MONTH(i.issue_date) = ?` : ''}
-        GROUP BY DATE(i.issue_date)
-        ORDER BY date ASC
-        LIMIT 30`;
-  }
+        WHERE o.branch_id = ? 
+        AND YEAR(i.issue_date) = ?
+        ORDER BY month ASC`,
+        [branchId, year]
+      );
+      availableMonths = monthsQuery[0];
+    }
 
-  const params = [];
-  if (branchId) params.push(branchId);
-  if (period === 'day' && year && month) {
-    params.push(year, month);
-  } else if ((period === 'month' || period === 'quarter') && year) {
-    params.push(year);
-  } else if (period === 'year') {
-    params.push(Number(yearLimit));
-  }
+    const params = {
+      branchId: branchId,
+      year: year ? year : null,
+      month: month ? month : null
+    };
 
-  const query = await db.raw(timeQuery, params);
-  revenueData = query[0];
+    let result;
+
+    switch (period) {
+      case 'month':
+        if (params.year) result = await db.raw(`CALL GetMonthlyRevenueByYear(?, ?)`, [params.branchId, params.year]);
+        break;
+      case 'quarter':
+        if (params.year) result = await db.raw(`CALL GetQuarterlyRevenueByYear(?, ?)`, [params.branchId, params.year]);
+        break;
+      case 'year':
+        result = await db.raw(`CALL GetYearlyRevenue(?)`, [params.branchId]);
+        break;
+      default: // day
+        result = await db.raw(`CALL GetDailyRevenueByMonthYear(?, ?, ?)`, [params.branchId, params.year, params.month]);
+    }
+
+    revenueData = result ? result[0][0] : [];
+  }
 
   const branches = await db('branch');
   res.render('layout/main-layout', {
