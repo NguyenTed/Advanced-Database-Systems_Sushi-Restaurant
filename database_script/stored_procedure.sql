@@ -14,6 +14,7 @@ DROP PROCEDURE IF EXISTS GetYearlyRevenue;
 DROP PROCEDURE IF EXISTS GetCustomerInfo;
 DROP PROCEDURE IF EXISTS GetEmployeeInfo;
 DROP PROCEDURE IF EXISTS TransferEmployee;
+DROP PROCEDURE IF EXISTS DeleteEmployee;
 DROP PROCEDURE IF EXISTS GetMostOrderedDishesInRange;
 DROP PROCEDURE IF EXISTS SearchOrdersByCriteria;
 DROP PROCEDURE IF EXISTS SearchInvoicesByCriteria;
@@ -535,6 +536,43 @@ BEGIN
     VALUES (
         p_employee_id, p_new_branch_id, p_new_department_id, p_transfer_date, NULL
     );
+END$$
+DELIMITER ;
+
+-- Quản lý công ty: Xóa nhân sự
+DELIMITER $$
+CREATE PROCEDURE DeleteEmployee(
+    IN p_employee_id INT,
+    IN p_end_date DATE
+)
+BEGIN
+    DECLARE v_active_history_exists INT;
+    
+    -- Check if employee has active work history
+    SELECT COUNT(*) INTO v_active_history_exists
+    FROM employee_work_history 
+    WHERE employee_id = p_employee_id 
+    AND end_date IS NULL;
+    
+    -- Only proceed if active history exists
+    IF v_active_history_exists > 0 THEN
+        -- Update employee record (soft delete)
+        UPDATE employee 
+        SET department_id = NULL,
+            branch_id = NULL
+        WHERE employee_id = p_employee_id;
+        
+        -- Update work history end date
+        UPDATE employee_work_history 
+        SET end_date = p_end_date
+        WHERE employee_id = p_employee_id 
+        AND end_date IS NULL;
+        
+        SELECT 'Employee successfully deactivated' as message;
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No active work history found for employee';
+    END IF;
 END$$
 DELIMITER ;
 
