@@ -29,6 +29,10 @@
                         onclick="showSection('transfer', event)">
                         Chuyển nhân sự
                     </a>
+                    <a href="#delete" class="block px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+                        onclick="showSection('delete', event)">
+                        Xóa nhân viên
+                    </a>
                 </nav>
             </div>
         </div>
@@ -113,6 +117,86 @@
                     </div>
                 </form>
             </div>
+
+            <!-- Delete Section -->
+            <div id="delete" class="hidden bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Xóa nhân viên</h2>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <h3 class="text-lg font-semibold text-red-800">Cảnh báo</h3>
+                    </div>
+                    <p class="text-red-700">
+                        Hành động này sẽ xóa vĩnh viễn thông tin nhân viên khỏi hệ thống. Hành động này không thể hoàn
+                        tác.
+                    </p>
+                </div>
+
+                <form
+                    action="/thong-ke/cong-ty/chinh-sua-nhan-vien?areaId=<%= selectedArea %>&branchId=<%= selectedBranch %>&type=delete"
+                    method="POST" onsubmit="return confirmDelete()">
+                    <input type="hidden" name="employee_id" value="<%= employee.employee_id %>">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="confirmName" class="block text-gray-700 mb-2">
+                                Nhập "<%= employee.name %>" để xác nhận xóa
+                            </label>
+                            <input type="text" id="confirmName"
+                                class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-red-500"
+                                data-confirm-name="<%= employee.name %>" required>
+                        </div>
+                        <button type="submit"
+                            class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            Xóa nhân viên
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                function showSection(sectionId, e) {
+                    if (e) {
+                        e.preventDefault();
+                    }
+            
+                    // Hide all sections
+                    document.querySelectorAll('#personal-info, #transfer, #delete').forEach(section => {
+                        section.classList.add('hidden');
+                    });
+            
+                    // Show selected section
+                    document.getElementById(sectionId).classList.remove('hidden');
+            
+                    // Update active state in menu
+                    document.querySelectorAll('nav a').forEach(link => {
+                        if (link.getAttribute('href') === '#' + sectionId) {
+                            link.classList.add('bg-red-50', 'text-red-700');
+                        } else {
+                            link.classList.remove('bg-red-50', 'text-red-700');
+                        }
+                    });
+                }
+            
+                function confirmDelete() {
+                    const input = document.getElementById('confirmName');
+                    const expectedName = input.getAttribute('data-confirm-name');
+                    
+                    if (input.value !== expectedName) {
+                        alert('Tên nhân viên không khớp. Vui lòng thử lại.');
+                        return false;
+                    }
+                    
+                    return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');
+                }
+            
+                // Show personal info section by default
+                document.addEventListener('DOMContentLoaded', () => {
+                    showSection('personal-info', null);
+                });
+            </script>
         </div>
     </div>
 </div>

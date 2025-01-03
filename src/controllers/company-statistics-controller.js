@@ -225,6 +225,11 @@ export const postEditEmployee = async (req, res) => {
         departmentRecord.department_id,
         new Date().toISOString().split('T')[0] // Current date in YYYY-MM-DD
       ]);
+    } else if (type === 'delete') {
+      // Call DeleteEmployee procedure with current date
+      await db.raw('CALL DeleteEmployee(?, ?)', [employee_id, new Date().toISOString().split('T')[0]]);
+
+      return res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
     }
 
     res.redirect(`/thong-ke/cong-ty/nhan-vien?areaId=${areaId}&branchId=${branchId}`);
